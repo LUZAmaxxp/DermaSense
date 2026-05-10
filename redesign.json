@@ -1,0 +1,424 @@
+{
+  "task": "frontend_redesign_only",
+  "project": "DermaSense",
+  "layout": "Command Center — Layout A",
+  "scope": "FRONTEND AND DESIGN ONLY — do not touch any backend files, API routes, Mongoose models, MQTT logic, Zustand stores, hooks, or any file inside /lib, /models, /store, /hooks, /api. Only modify files inside /app/(dashboard), /app/(auth), /components, globals.css, and tailwind config.",
+
+  "instruction": "Redesign every page and component listed below using the Command Center layout. Keep all existing data bindings, props, hooks (useSensorStore, useAlertStore, useSensorStream, useAlerts, useMqttStatus, usePressureHistory), and API calls exactly as they are. Only change the visual layout, HTML structure, CSS classes, and styling. Do not add or remove any data fetching logic.",
+
+  "design_system": {
+    "fonts": {
+      "display": "Manrope",
+      "body": "Inter",
+      "import": "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap')"
+    },
+    "tailwind_config": {
+      "method": "Tailwind v4 CSS-native — all tokens as CSS custom properties in globals.css @theme inline block. No tailwind.config.ts changes.",
+      "tokens_to_add": {
+        "--color-derma-blue": "#003f7b",
+        "--color-derma-blue-light": "#1a5c9e",
+        "--color-derma-green": "#006e11",
+        "--color-derma-teal": "#00474f",
+        "--color-derma-crimson": "#ba1a1a",
+        "--color-derma-amber": "#f59e0b",
+        "--color-derma-orange": "#f97316",
+        "--color-derma-slate": "#424751",
+        "--font-manrope": "'Manrope', sans-serif",
+        "--font-inter": "'Inter', sans-serif"
+      }
+    },
+    "pressure_color_utility": {
+      "function_name": "mmhgToColor",
+      "file": "lib/utils/pressure.ts — ALREADY EXISTS, do not touch",
+      "note": "Use the existing utility. Only consume it in UI components for fill/text/bg color."
+    },
+    "colors": {
+      "primary": "#003f7b",
+      "safe": "#006e11",
+      "warning": "#f59e0b",
+      "high": "#f97316",
+      "critical": "#ba1a1a",
+      "background": "#f9fafb",
+      "card": "#ffffff",
+      "sidebar_bg": "#ffffff",
+      "topbar_bg": "#003f7b"
+    },
+    "pressure_levels": [
+      { "range": "0–32",  "color": "#006e11", "bg": "#dcfce7", "label": "Sûr" },
+      { "range": "32–45", "color": "#f59e0b", "bg": "#fef3c7", "label": "Attention" },
+      { "range": "45–60", "color": "#f97316", "bg": "#ffedd5", "label": "Élevé" },
+      { "range": ">60",   "color": "#ba1a1a", "bg": "#fee2e2", "label": "Critique" }
+    ],
+    "border_radius": { "card": "16px", "badge": "8px", "button": "12px", "input": "8px" },
+    "shadow": "0 1px 3px rgba(0,0,0,0.06)",
+    "animations": {
+      "alert_pulse": "Add to globals.css: @keyframes derma-pulse { 0%,100%{opacity:1} 50%{opacity:0.6} } .alert-pulse { animation: derma-pulse 2s ease-in-out infinite; }",
+      "heatmap_node": "transition: fill 300ms ease — on each SVG circle in BodyHeatmap",
+      "status_dot": "Tailwind animate-pulse class on MQTT connected dot"
+    }
+  },
+
+  "global_shell": {
+    "file": "app/(dashboard)/layout.tsx",
+    "description": "Replace the current mobile-first bottom-nav shell with a full Command Center layout.",
+    "structure": {
+      "topbar": {
+        "position": "fixed top-0 left-0 right-0 z-50",
+        "height": "56px",
+        "background": "#003f7b",
+        "content_left": "DS logo SVG + 'DERMASENSE' in Manrope 600 white 15px + letter-spacing 0.08em",
+        "content_center": "Patient chip: avatar circle (NS initials) + patient name + ward + ID badge — white text",
+        "content_right": "MQTT status dot (green animate-pulse if connected, red if not) + 'MQTT' label white 11px | Bell icon with red badge showing activeAlertCount from useAlertStore | Avatar button (NS initials circle)"
+      },
+      "sidebar": {
+        "position": "fixed left-0 top-[56px] bottom-0 z-40",
+        "width": "64px",
+        "background": "#ffffff",
+        "border_right": "1px solid #f1f5f9",
+        "nav_items": [
+          { "id": "home",       "icon": "HomeIcon",           "label": "Accueil",    "route": "/" },
+          { "id": "monitoring", "icon": "ActivityIcon",       "label": "Monitoring", "route": "/monitoring" },
+          { "id": "pressure",   "icon": "TrendingUpIcon",     "label": "Pression",   "route": "/pressure" },
+          { "id": "alerts",     "icon": "BellIcon",           "label": "Alertes",    "route": "/alerts",  "badge": "activeAlertCount" },
+          { "id": "settings",   "icon": "SettingsIcon",       "label": "Paramètres", "route": "/settings" }
+        ],
+        "nav_item_style": {
+          "container": "w-full flex flex-col items-center py-3 gap-1 cursor-pointer relative group",
+          "icon_size": "20px",
+          "label_size": "9px Inter",
+          "active": "text-[#003f7b] bg-[#eff6ff] rounded-xl mx-1",
+          "inactive": "text-gray-400 hover:text-[#003f7b] hover:bg-gray-50 rounded-xl mx-1",
+          "active_indicator": "absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-8 bg-[#003f7b] rounded-r-full"
+        }
+      },
+      "page_content": {
+        "margin_top": "56px",
+        "margin_left": "64px",
+        "padding": "20px",
+        "background": "#f9fafb",
+        "min_height": "calc(100vh - 56px)"
+      }
+    },
+    "remove": "BottomNav component entirely — delete components/layout/BottomNav.tsx"
+  },
+
+  "pages": {
+
+    "home": {
+      "file": "app/(dashboard)/page.tsx",
+      "layout": "3-column CSS grid: col-1 (280px) col-2 (1fr) col-3 (300px), gap 16px",
+      "data_hooks": "useSensorStore, useAlertStore — keep exactly as-is, only change JSX structure",
+      "columns": {
+        "col_1_left": {
+          "items": [
+            {
+              "component": "GlobalSafetyScore",
+              "file": "components/home/GlobalSafetyScore.tsx",
+              "card": "white card rounded-2xl p-5 shadow-sm",
+              "content": "Label 'Score de Sécurité' 11px Inter uppercase tracking-widest text-slate-400 | SVG circular ring 96px — strokeDasharray computed from score percent — stroke color: green if >=80, amber if >=60, crimson if <60 | Score number 40px Manrope bold centered in ring | Status label badge below ring (Optimal / Attention / Critique) | Subtitle: 'Risque d\'escarre minimisé' 11px text-slate-400 | Last update timestamp 10px"
+            },
+            {
+              "component": "PositionActuelle",
+              "file": "components/home/PositionActuelle.tsx",
+              "card": "white card rounded-2xl p-5 shadow-sm mt-4",
+              "content": "Label 'Position Actuelle' 11px uppercase | Large bed icon (lucide BedDouble) 32px color #003f7b | Position name 16px Manrope semibold (Décubitus Dorsal / Latéral Gauche / etc.) | Time maintained 12px text-slate-400 | Divider | Humidity row: droplet icon + 'Humidité locale' + progress bar + percent value"
+            },
+            {
+              "component": "MobilityHistory",
+              "file": "components/home/MobilityHistory.tsx",
+              "card": "white card rounded-2xl p-5 shadow-sm mt-4",
+              "content": "Label 'Historique Mobilité (24h)' 11px uppercase | List of last 6 position changes: each row = clock icon 12px + time string + arrow icon + position name | Scrollable max-h-48 overflow-y-auto | No chart needed — timeline list is cleaner"
+            }
+          ]
+        },
+        "col_2_center": {
+          "items": [
+            {
+              "component": "PressureMapPreview",
+              "file": "components/home/PressureMapPreview.tsx",
+              "card": "white card rounded-2xl p-5 shadow-sm",
+              "content": "Header row: title 'Carte de Pression' Manrope 14px semibold + 'Plein écran →' link to /monitoring aligned right | 5×8 grid of 40 colored cells (40px each, gap 4px, rounded-lg) — each cell background = pressure color from matrix[i] | Cell hover: show tooltip with zone name + mmHg value | Color legend row below grid: 4 colored dots with labels"
+            },
+            {
+              "component": "AlerteProtocole",
+              "file": "components/home/AlerteProtocole.tsx",
+              "card": "white card rounded-2xl p-4 shadow-sm mt-4",
+              "content": "Header: 'Alertes Protocole' Manrope 14px semibold + badge showing activeAlertCount | Two sub-cards side by side: (1) FENÊTRE 30MIN — green check or orange clock icon + status text + 'Conforme' or 'Dépassé' badge | (2) FENÊTRE 60MIN — timer icon + 'Repositionnement requis' if time exceeded + countdown mm/60m | critical cards wrapped in alert-pulse div"
+            }
+          ]
+        },
+        "col_3_right": {
+          "items": [
+            {
+              "component": "ZoneStatsRail",
+              "description": "NEW component — extract zone data from useSensorStore().latest.zones",
+              "file": "components/home/ZoneStatsRail.tsx",
+              "card": "white card rounded-2xl p-5 shadow-sm",
+              "content": "Title 'Zones Critiques' 11px uppercase | For each of 5 zones (Sacrum, Épaules, Thorax, Talons, Jambes): zone name 12px Inter + mmHg value right-aligned colored by pressure level + thin progress bar (max=80 mmHg, fill color = pressure color) | Rows sorted by pressure descending"
+            },
+            {
+              "component": "ActiveAlertsList",
+              "description": "NEW component reading from useAlertStore().alerts filtered to active",
+              "file": "components/home/ActiveAlertsList.tsx",
+              "card": "white card rounded-2xl p-5 shadow-sm mt-4",
+              "content": "Title 'Alertes Actives' + count badge | Scrollable list max-h-64: each AlertItem = border-l-4 colored by severity + zone name bold + mmHg + duration + timestamp | Critical items have alert-pulse class on wrapper | Empty state: green check icon + 'Aucune alerte active'"
+            },
+            {
+              "component": "ModeVigilance",
+              "file": "components/home/ModeVigilance.tsx",
+              "card": "white card rounded-2xl p-4 shadow-sm mt-4 bg-[#003f7b]",
+              "content": "Moon icon white | 'Mode Vigilance' white Manrope 13px semibold | 'Protocoles de nuit actifs' white 11px | Show only between 22:00–06:00 based on current hour, hide otherwise"
+            }
+          ]
+        }
+      }
+    },
+
+    "monitoring": {
+      "file": "app/(dashboard)/monitoring/page.tsx",
+      "layout": "2-column: col-1 (420px fixed) col-2 (1fr), gap 20px",
+      "data_hooks": "useSensorStore, useMqttStatus — keep as-is",
+      "columns": {
+        "col_1_heatmap": {
+          "component": "BodyHeatmap",
+          "file": "components/monitoring/BodyHeatmap.tsx",
+          "card": "white card rounded-2xl p-6 shadow-sm",
+          "header": "Title 'Monitoring Temps Réel' Manrope 16px | SystemStatus component inline right (green dot + 'MQTT Connecté' or red + 'Déconnecté')",
+          "svg": {
+            "viewBox": "0 0 300 600",
+            "description": "SVG body silhouette (supine view). Draw a simplified anatomical outline using SVG path for the body shape in light gray (#f1f5f9 fill, #e2e8f0 stroke 1px).",
+            "body_outline_path": "Approximate path: head circle cx=150 cy=50 r=36 | neck rect | shoulders wide rect | torso tapered rect | hips rect | legs two parallel rects | feet small rects — all in light gray as background",
+            "sensor_nodes": {
+              "count": 40,
+              "element": "<circle r='9' cx={x} cy={y} fill={mmhgColor(matrix[i])} style='transition: fill 300ms ease;'><title>{zoneName}: {value} mmHg</title></circle>",
+              "positions": {
+                "description": "Hardcode 40 (x,y) anatomical positions across the body outline. Use an 8-row × 5-column logical grid mapped to body zones.",
+                "zones_layout": [
+                  { "zone": "Tête",     "rows": 0,   "sensor_indices": [0],        "y_range": "30–70",   "x_range": "130–170" },
+                  { "zone": "Épaules",  "rows": "1", "sensor_indices": [1,2,3,4,5], "y_range": "110–140", "x_range": "60–240" },
+                  { "zone": "Thorax",   "rows": "2–3","sensor_indices": [6,7,8,9,10,11,12,13,14,15], "y_range": "155–240", "x_range": "80–220" },
+                  { "zone": "Sacrum",   "rows": "4–5","sensor_indices": [16,17,18,19,20,21,22,23,24,25,26,27], "y_range": "260–340", "x_range": "90–210" },
+                  { "zone": "Jambes",   "rows": "6",  "sensor_indices": [28,29,30,31,32,33], "y_range": "360–440", "x_range": "90–210" },
+                  { "zone": "Talons",   "rows": "7",  "sensor_indices": [34,35,36,37,38,39], "y_range": "470–520", "x_range": "90–210" }
+                ],
+                "exact_coordinates": "Generate precise (x,y) pairs by distributing sensor_indices evenly within their x_range and y_range. Space them uniformly."
+              }
+            }
+          },
+          "legend": "ZoneLegend component below SVG: 4 colored squares + labels in a flex row"
+        },
+        "col_2_stats": {
+          "items": [
+            {
+              "component": "StatsRow",
+              "description": "3 metric cards in a row — each white card rounded-xl p-4",
+              "metrics": [
+                "Pression Moy: large number Manrope 32px colored by level + 'mmHg' 14px",
+                "Score Global: large number Manrope 32px green/amber/crimson + '%'",
+                "Capteurs Actifs: large number Manrope 32px #003f7b + '/40'"
+              ]
+            },
+            {
+              "component": "ZoneBreakdown",
+              "card": "white card rounded-2xl p-5 shadow-sm mt-4",
+              "content": "Title 'Répartition par Zone' | Table: 5 rows (Sacrum, Épaules, Thorax, Talons, Jambes) — columns: Zone name | Moy mmHg | Max mmHg | Capteurs | Statut badge | Rows sorted by avg descending | Row background tinted by severity (very light: fee2e2 for critical, fef3c7 for warning, dcfce7 for safe)"
+            },
+            {
+              "component": "SystemStatus",
+              "file": "components/monitoring/SystemStatus.tsx",
+              "card": "white card rounded-2xl p-4 shadow-sm mt-4",
+              "content": "Title 'Statut Système' | 3 rows: MQTT status (dot + text + latency ms) | Dernière lecture (clock icon + timestamp) | Capteurs actifs (chip icon + count/40) | All from useMqttStatus() and useSensorStore()"
+            },
+            {
+              "component": "PositionTimeline",
+              "card": "white card rounded-2xl p-4 shadow-sm mt-4",
+              "content": "Title 'Historique de Position' | Vertical timeline: each entry = colored left line + circle dot + time + position name | Last 5 entries from useSensorStore().history filtered to position changes | No logic change — just visual timeline style"
+            }
+          ]
+        }
+      }
+    },
+
+    "pressure": {
+      "file": "app/(dashboard)/pressure/page.tsx",
+      "layout": "2-column: col-1 (1fr) col-2 (340px), gap 20px",
+      "data_hooks": "useSensorStore, usePressureHistory — keep as-is",
+      "col_1": [
+        {
+          "component": "MmhgDisplay",
+          "file": "components/shared/MmhgDisplay.tsx",
+          "card": "white card rounded-2xl p-6 shadow-sm",
+          "content": "Label 'Pression Moyenne Actuelle' 11px uppercase slate-400 | Number: 56px Manrope bold colored by mmhgToColor() | Unit 'mmHg' 18px | Severity badge below number | Threshold reference: 'Seuil clinique: 32 mmHg' 11px slate-400"
+        },
+        {
+          "component": "TrendChart",
+          "file": "components/pressure/TrendChart.tsx",
+          "card": "white card rounded-2xl p-5 shadow-sm mt-4",
+          "header": "Title 'Tendance 24h' Manrope 14px semibold | Time range selector tabs: 1h / 6h / 12h / 24h (filter history array client-side)",
+          "chart": "Recharts LineChart — dynamic import ssr:false | Line stroke: color from current pressure level | ReferenceLine y=32 stroke='#ba1a1a' strokeDasharray='4 4' label='Seuil 32 mmHg' | XAxis: HH:mm timestamps | YAxis: 0–80 | Tooltip showing time + mmHg | Smooth curve (type='monotone') | Height 240px | CartesianGrid light gray"
+        }
+      ],
+      "col_2": [
+        {
+          "component": "ZoneRiskTable",
+          "file": "components/pressure/ZoneRiskTable.tsx",
+          "card": "white card rounded-2xl p-5 shadow-sm",
+          "content": "Title 'Analyse par Zone' | For each zone card (stacked vertically): zone name Manrope 13px semibold + severity badge right | avg mmHg large 24px Manrope colored | max mmHg 12px slate | thin full-width progress bar colored | bottom border divider between zones"
+        },
+        {
+          "component": "RiskSummary",
+          "card": "white card rounded-2xl p-5 shadow-sm mt-4",
+          "content": "Title 'Résumé du Risque' | Braden score: number 32px Manrope + '/23' + label | Risk level pill: full-width colored badge | Time at risk today: clock icon + duration | Repositioning due: countdown timer"
+        }
+      ]
+    },
+
+    "alerts": {
+      "file": "app/(dashboard)/alerts/page.tsx",
+      "layout": "2-column: col-1 (1fr alerts list) col-2 (320px daily chart + summary), gap 20px",
+      "data_hooks": "useAlertStore, useAlerts — keep as-is",
+      "col_1": {
+        "tabs": "shadcn Tabs component: Toutes | Actives | Historique — keep filter logic as-is",
+        "alert_card": {
+          "component": "AlertCard",
+          "file": "components/alerts/AlertCard.tsx",
+          "style": "white card rounded-2xl p-4 shadow-sm mb-3 border-l-4 (use exact border-l-4 not border-l) border-[#ba1a1a] for critical / border-[#f59e0b] for warning / border-[#003f7b] for info",
+          "critical_wrapper": "div className='alert-pulse' wrapping the card — CSS animation only, no JS",
+          "content": "Row 1: SeverityBadge + zone name Manrope 14px semibold + timestamp right 11px slate-400 | Row 2: pressure value large 24px Manrope colored + 'mmHg' + duration chip | Row 3: Dismiss button (outline small) + 'Guide Protocole' button (filled #003f7b small) | All button onClick handlers kept exactly as-is"
+        }
+      },
+      "col_2": [
+        {
+          "component": "DailyTrendChart",
+          "file": "components/alerts/DailyTrendChart.tsx",
+          "card": "white card rounded-2xl p-5 shadow-sm",
+          "content": "Title 'Alertes par Jour' | Recharts BarChart — dynamic import ssr:false | 7 bars Mon–Sun | Bar fill #003f7b | Bar radius [3,3,0,0] | Height 120px compact | data from GET /api/alerts/trends — keep existing fetch"
+        },
+        {
+          "component": "AlertSummary",
+          "card": "white card rounded-2xl p-5 shadow-sm mt-4",
+          "content": "3 stat rows: Critiques actives (red badge + count) | Avertissements (amber badge + count) | Résolues aujourd'hui (green badge + count) | All counts from useAlertStore"
+        }
+      ]
+    },
+
+    "settings": {
+      "file": "app/(dashboard)/settings/page.tsx",
+      "layout": "2-column: col-1 (1fr) col-2 (1fr), gap 20px",
+      "data_hooks": "useMqttStatus — keep as-is",
+      "col_1": [
+        {
+          "card": "white card rounded-2xl p-5 shadow-sm",
+          "content": "ProfileCard: avatar circle 56px bg-[#003f7b] white initials NS | Name Manrope 16px bold | Role + Service 12px slate-400 | Edit profile link"
+        },
+        {
+          "card": "white card rounded-2xl p-5 shadow-sm mt-4",
+          "content": "ThresholdSlider: Title 'Seuil d\'Alerte' | shadcn Slider min=20 max=60 step=1 default=32 | Current value displayed large Manrope 24px colored by level + ' mmHg' | Description 11px slate-400 | Keep onChange handler as-is"
+        },
+        {
+          "card": "white card rounded-2xl p-5 shadow-sm mt-4",
+          "content": "NotificationPrefs: Title 'Notifications' | 3 shadcn Switch rows: 'Alertes critiques' (default on) / 'Avertissements' (default on) / 'Informations' (default off) | Keep onChange as-is"
+        }
+      ],
+      "col_2": [
+        {
+          "card": "white card rounded-2xl p-5 shadow-sm",
+          "content": "ConnectivityCards: Title 'Connectivité' | 3 rows: MQTT (animate-pulse green dot if useMqttStatus().connected, red if not + URL text + latency) | Wi-Fi (static green dot + 'Réseau hospitalier') | Bluetooth (static blue dot + 'ESP32 Matelas') | Each row: icon + name + status right-aligned"
+        },
+        {
+          "card": "white card rounded-2xl p-5 shadow-sm mt-4",
+          "content": "MqttConfigCard: Title 'Configuration MQTT' | Read-only fields: Broker URL | Topic | Client ID | Intervalle de publication | All values from environment/config — display only, no edit"
+        },
+        {
+          "card": "white card rounded-2xl p-5 shadow-sm mt-4 bg-[#003f7b]",
+          "content": "DossierMedicalLink: white folder icon | 'Dossier Médical' white Manrope 14px semibold | 'Voir et modifier le profil patient' white 11px | Arrow icon right | onClick: router.push('/settings/patient')"
+        }
+      ]
+    },
+
+    "settings_patient": {
+      "file": "app/(dashboard)/settings/patient/page.tsx",
+      "layout": "Single centered column max-w-2xl mx-auto",
+      "data_hooks": "react-hook-form + zodResolver + GET/PATCH /api/patients/[id] — keep ALL form logic as-is",
+      "design": "white card rounded-2xl p-8 shadow-sm | Back button row at top: arrow-left icon + 'Paramètres' link | Title 'Dossier Médical' Manrope 20px bold | Patient avatar row | Form fields using shadcn Input and Textarea with Inter font labels 12px uppercase tracking-wide | Submit button full-width bg-[#003f7b] rounded-xl Manrope 14px semibold"
+    },
+
+    "recommendations": {
+      "file": "app/(dashboard)/recommendations/page.tsx",
+      "layout": "Single column max-w-3xl mx-auto",
+      "data_hooks": "useSensorStore — keep as-is",
+      "design": [
+        "RiskLevelCard: full-width card colored background by risk level (dcfce7/fef3c7/ffedd5/fee2e2) | Risk label 24px Manrope bold + icon | 'Basé sur les données en temps réel' 11px",
+        "PositioningCards: 3 cards in a row — each = icon + position name + 'Recommandé' badge on one | hover effect border-[#003f7b]",
+        "SkinCareTips: 4 tip cards in 2×2 grid — each = colored icon circle + tip title + description",
+        "BradenNote: info callout card border-l-4 border-[#003f7b] bg-blue-50 | Braden score + protocol text"
+      ]
+    },
+
+    "login": {
+      "file": "app/(auth)/login/page.tsx",
+      "layout": "Full screen split: left half bg-[#003f7b] with branding | right half white with form",
+      "left_panel": "DS logo large white | 'DERMASENSE' Manrope 32px white bold | Tagline 'Surveillance de Pression Clinique' Inter 14px #93c5fd | 3 feature pills: shield icon + 'Temps réel' / activity icon + 'MQTT IoT' / heart icon + 'Prévention escarre'",
+      "right_panel": "Form centered: 'Connexion' Manrope 24px bold #003f7b | Email field + Password field (show/hide toggle) | 'Se connecter' button full-width bg-[#003f7b] rounded-xl | Biometric row: fingerprint + wifi icons cosmetic only | Keep ALL form logic (react-hook-form, zodResolver, signIn call) exactly as-is"
+    }
+  },
+
+  "shared_components": {
+    "SeverityBadge": {
+      "file": "components/shared/SeverityBadge.tsx",
+      "style": "Pill span px-2 py-0.5 rounded-lg text-11px font-medium | critical: bg-[#fee2e2] text-[#ba1a1a] | warning: bg-[#fef3c7] text-[#92400e] | high: bg-[#ffedd5] text-[#c2410c] | info: bg-[#eff6ff] text-[#003f7b] | safe: bg-[#dcfce7] text-[#006e11]"
+    },
+    "PulseRing": {
+      "file": "components/shared/PulseRing.tsx",
+      "style": "div with className='ring-2 ring-[#ba1a1a] rounded-2xl alert-pulse' wrapping child | CSS animation from globals.css"
+    },
+    "SkeletonCard": {
+      "file": "components/shared/SkeletonCard.tsx",
+      "style": "Use shadcn Skeleton component inside a white rounded-2xl card shell"
+    }
+  },
+
+  "globals_css_changes": {
+    "file": "app/globals.css",
+    "add": [
+      "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');",
+      "@keyframes derma-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }",
+      ".alert-pulse { animation: derma-pulse 2s ease-in-out infinite; }",
+      "body { font-family: 'Inter', sans-serif; background: #f9fafb; }",
+      "h1,h2,h3,h4,h5,h6,.font-display { font-family: 'Manrope', sans-serif; }",
+      "@theme inline { --color-derma-blue: #003f7b; --color-derma-green: #006e11; --color-derma-crimson: #ba1a1a; --color-derma-amber: #f59e0b; --color-derma-orange: #f97316; --color-derma-slate: #424751; }"
+    ]
+  },
+
+  "do_not_touch": [
+    "app/api/** — all route handlers",
+    "lib/mongodb.ts",
+    "lib/mqtt-client.ts",
+    "lib/mqtt-store.ts",
+    "lib/auth.ts",
+    "lib/validations/**",
+    "lib/utils/pressure.ts — use it, don't edit it",
+    "models/**",
+    "store/** — all Zustand stores",
+    "hooks/** — all hooks",
+    "types/**",
+    ".env.local",
+    "middleware.ts",
+    "next.config.*"
+  ],
+
+  "implementation_rules": [
+    "Every data binding that exists today (useSensorStore, useAlertStore, useAlerts, useMqttStatus, usePressureHistory) must remain connected to the same store/hook — only the JSX wrapper changes.",
+    "All onClick, onSubmit, onChange handlers stay identical — only wrap them in new styled elements.",
+    "Recharts components must use dynamic(() => import('recharts'), { ssr: false }) — do not change this pattern.",
+    "Use lucide-react for all icons — already installed.",
+    "Use shadcn/ui Slider, Switch, Tabs, Input, Button, Skeleton — already installed.",
+    "border-l-4 is mandatory on AlertCard — never use border-l (1px is invisible).",
+    "All chart heights must be explicit px values — never percentages.",
+    "No position: fixed inside page components — only in layout.tsx shell.",
+    "SVG BodyHeatmap sensor circles must have style={{ transition: 'fill 300ms ease' }} on each circle.",
+    "The sidebar width (64px) and topbar height (56px) must be consistent across all pages via CSS variables or Tailwind arbitrary values.",
+    "Delete components/layout/BottomNav.tsx after creating the new sidebar.",
+    "Use Next.js Link component for all navigation — no window.location or router.push for nav items."
+  ]
+}

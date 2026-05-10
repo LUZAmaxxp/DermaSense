@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/sensors/stream/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}
