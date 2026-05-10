@@ -27,7 +27,7 @@ export function SystemStatus() {
         <WifiOff size={12} className="text-[#ba1a1a]" />
       )}
       <div className={`w-1.5 h-1.5 rounded-full ${connected ? "bg-[#006e11] animate-pulse" : "bg-[#ba1a1a]"}`} />
-      {connected ? `Connecté · ${broker}` : "Déconnecté"}
+      {connected ? "Connecté · HiveMQ Cloud" : "Déconnecté"}
     </div>
   );
 }

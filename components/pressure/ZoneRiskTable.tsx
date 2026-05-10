@@ -21,8 +21,9 @@ interface ZoneRiskTableProps {
 }
 
 function statusBadge(avg: number) {
-  if (avg > 32) return <span className="text-xs font-bold text-[#ba1a1a] bg-red-100 px-2 py-0.5 rounded-full">Critique</span>;
-  if (avg > 20) return <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">Attention</span>;
+  if (avg >= 40) return <span className="text-xs font-bold text-white bg-[#ba1a1a] px-2 py-0.5 rounded-full">URGENCE</span>;
+  if (avg >= 32) return <span className="text-xs font-bold text-[#ba1a1a] bg-red-100 px-2 py-0.5 rounded-full">Critique</span>;
+  if (avg >= 30) return <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">Prévention</span>;
   return <span className="text-xs font-bold text-[#006e11] bg-green-100 px-2 py-0.5 rounded-full">OK</span>;
 }
 

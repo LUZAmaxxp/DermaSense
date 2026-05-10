@@ -1,5 +1,14 @@
 import type { PressureLevel, ZoneName, ZoneStats } from "@/types/sensor.types";
 
+// ─── Clinical pressure thresholds (mmHg) ─────────────────────────────────────
+// 🟢 P < 30       → Normal
+// 🟠 30 ≤ P < 32  → Prévention / surveillance
+// 🔴 P ≥ 32       → Repositionnement obligatoire
+// 🚨 P ≥ 40       → Urgence immédiate + buzzer ESP32
+export const P_NORMAL    = 30;
+export const P_CAUTION   = 32;
+export const P_EMERGENCY = 40;
+
 // Zone → matrix index ranges
 export const ZONE_INDICES: Record<ZoneName, number[]> = {
   shoulders: [0, 1, 2, 3, 4, 5, 6, 7],
@@ -9,24 +18,24 @@ export const ZONE_INDICES: Record<ZoneName, number[]> = {
   heels:     [32, 33, 34, 35, 36, 37, 38, 39],
 };
 
-export function mmHgToLevel(value: number, threshold = 32): PressureLevel {
-  if (value > threshold) return "critical";
-  if (value > threshold * 0.75) return "warning";
+export function mmHgToLevel(value: number): PressureLevel {
+  if (value >= P_CAUTION) return "critical";
+  if (value >= P_NORMAL)  return "warning";
   return "safe";
 }
 
 export function mmHgToColor(value: number): string {
-  if (value > 40) return "#ba1a1a";  // critical — crimson
-  if (value > 32) return "#f97316";  // high — orange
-  if (value > 20) return "#f59e0b";  // warning — amber
-  return "#006e11";                   // safe — green
+  if (value >= P_EMERGENCY) return "#ba1a1a";  // urgence — crimson
+  if (value >= P_CAUTION)   return "#f97316";  // repositionnement — orange-red
+  if (value >= P_NORMAL)    return "#f59e0b";  // prévention — amber
+  return "#006e11";                             // normal — green
 }
 
 export function computeZoneStats(matrix: number[], indices: number[]): ZoneStats {
   const values = indices.map((i) => matrix[i] ?? 0);
   const avg = values.reduce((a, b) => a + b, 0) / values.length;
   const max = Math.max(...values);
-  const count_over_32 = values.filter((v) => v > 32).length;
+  const count_over_32 = values.filter((v) => v >= P_CAUTION).length;
   return { avg: Math.round(avg * 10) / 10, max, count_over_32 };
 }
 
@@ -40,13 +49,13 @@ export function computeAllZones(matrix: number[]) {
   };
 }
 
-export function computeSafetyScore(matrix: number[], threshold = 32): number {
-  const criticalCount = matrix.filter((v) => v > threshold).length;
+export function computeSafetyScore(matrix: number[]): number {
+  const criticalCount = matrix.filter((v) => v >= P_CAUTION).length;
   return Math.round(Math.max(0, 100 - (criticalCount / matrix.length) * 100));
 }
 
 export function safetyLabel(score: number): { label: string; color: string } {
-  if (score >= 80) return { label: "Optimal", color: "#006e11" };
-  if (score >= 60) return { label: "Attention", color: "#f59e0b" };
-  return { label: "Critique", color: "#ba1a1a" };
+  if (score >= 80) return { label: "Optimal",          color: "#006e11" };
+  if (score >= 50) return { label: "Prévention",       color: "#f59e0b" };
+  return                  { label: "Repositionnement", color: "#ba1a1a" };
 }

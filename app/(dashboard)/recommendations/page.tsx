@@ -46,7 +46,7 @@ export default function RecommendationsPage() {
           </p>
           <p className="text-3xl font-bold" style={{ fontFamily: "Manrope, sans-serif", color: riskText }}>{label}</p>
           <p className="text-sm mt-1" style={{ color: riskText, opacity: 0.75 }}>
-            Score: {score}% &mdash; {latest!.matrix.filter((v) => v > 32).length} zones critiques
+            Score: {score}% &mdash; {latest!.matrix.filter((v) => v >= 32).length} zones critiques
           </p>
         </div>
       ) : (

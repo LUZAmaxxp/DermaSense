@@ -70,10 +70,11 @@ export default function MonitoringPage() {
                 ? Object.entries(latest.zones)
                     .sort((a, b) => b[1].avg - a[1].avg)
                     .map(([zone, stats]) => {
-                      const isCrit = stats.avg > 32;
-                      const isWarn = stats.avg > 20;
+                      const isUrgent = stats.avg >= 40;
+                      const isCrit   = stats.avg >= 32;
+                      const isWarn   = stats.avg >= 30;
                       return (
-                        <tr key={zone} style={{ background: isCrit ? "#fee2e220" : isWarn ? "#fef3c720" : "#dcfce720" }}>
+                        <tr key={zone} style={{ background: isUrgent ? "#fee2e240" : isCrit ? "#fee2e220" : isWarn ? "#fef3c720" : "#dcfce720" }}>
                           <td className="py-2 font-medium text-gray-700">{ZONE_LABELS[zone] ?? zone}</td>
                           <td className="py-2 text-right font-semibold" style={{ color: mmHgToColor(stats.avg) }}>
                             {stats.avg.toFixed(1)}
@@ -82,10 +83,10 @@ export default function MonitoringPage() {
                           <td className="py-2 text-right">
                             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
                               style={{
-                                background: isCrit ? "#fee2e2" : isWarn ? "#fef3c7" : "#dcfce7",
-                                color: isCrit ? "#ba1a1a" : isWarn ? "#92400e" : "#006e11",
+                                background: isUrgent ? "#ba1a1a" : isCrit ? "#fee2e2" : isWarn ? "#fef3c7" : "#dcfce7",
+                                color: isUrgent ? "#fff" : isCrit ? "#ba1a1a" : isWarn ? "#92400e" : "#006e11",
                               }}>
-                              {isCrit ? "Critique" : isWarn ? "Attention" : "OK"}
+                              {isUrgent ? "URGENCE" : isCrit ? "Critique" : isWarn ? "Prévention" : "OK"}
                             </span>
                           </td>
                         </tr>

@@ -15,7 +15,7 @@ export function MmhgDisplay({ value, showUnit = true, className = "" }: MmhgDisp
       </span>
     );
   }
-  const color = value > 40 ? "#ba1a1a" : value > 32 ? "#f97316" : value > 20 ? "#f59e0b" : "#006e11";
+  const color = value >= 40 ? "#ba1a1a" : value >= 32 ? "#f97316" : value >= 30 ? "#f59e0b" : "#006e11";
   return (
     <span className={`inline-flex items-end gap-1 ${className}`}>
       <span
