@@ -1,10 +1,14 @@
+import { alertLevelToColor, mmHgToColor } from "@/lib/utils/pressure";
+import type { AlertLevel } from "@/types/sensor.types";
+
 interface MmhgDisplayProps {
   value: number | null;
+  alertLevel?: AlertLevel;
   showUnit?: boolean;
   className?: string;
 }
 
-export function MmhgDisplay({ value, showUnit = true, className = "" }: MmhgDisplayProps) {
+export function MmhgDisplay({ value, alertLevel, showUnit = true, className = "" }: MmhgDisplayProps) {
   if (value === null || value === undefined) {
     return (
       <span className={`inline-flex items-end gap-1 ${className}`}>
@@ -15,7 +19,7 @@ export function MmhgDisplay({ value, showUnit = true, className = "" }: MmhgDisp
       </span>
     );
   }
-  const color = value >= 40 ? "#ba1a1a" : value >= 32 ? "#f97316" : value >= 30 ? "#f59e0b" : "#006e11";
+  const color = alertLevel ? alertLevelToColor(alertLevel) : value >= 40 ? "#ba1a1a" : value >= 32 ? "#f97316" : value >= 30 ? "#f59e0b" : "#006e11";
   return (
     <span className={`inline-flex items-end gap-1 ${className}`}>
       <span

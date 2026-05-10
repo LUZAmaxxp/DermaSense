@@ -1,9 +1,9 @@
 export function ZoneLegend() {
   const items = [
-    { color: "#006e11", label: "Faible (≤20 mmHg)" },
-    { color: "#f59e0b", label: "Modéré (21–32 mmHg)" },
-    { color: "#f97316", label: "Élevé (33–40 mmHg)" },
-    { color: "#ba1a1a", label: "Critique (>40 mmHg)" },
+    { color: "#006e11", label: "Normal (< 30 mmHg)" },
+    { color: "#f59e0b", label: "Prévention (30–31 mmHg)" },
+    { color: "#f97316", label: "Critique ≥ 32 mmHg" },
+    { color: "#ba1a1a", label: "Urgence ≥ 40 mmHg" },
   ];
   return (
     <div className="grid grid-cols-2 gap-2">

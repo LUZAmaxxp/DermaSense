@@ -2,7 +2,7 @@
 import { useSensorStore } from "@/store/useSensorStore";
 import { useSensorStream } from "@/hooks/useSensorStream";
 import { usePressureHistory } from "@/hooks/usePressureHistory";
-import { mmHgToColor, safetyLabel, P_NORMAL, P_CAUTION, P_EMERGENCY } from "@/lib/utils/pressure";
+import { mmHgToColor, safetyLabel, alertLevelToSeverity, P_NORMAL, P_CAUTION, P_EMERGENCY } from "@/lib/utils/pressure";
 import { formatTime } from "@/lib/utils/format";
 import { MmhgDisplay } from "@/components/shared/MmhgDisplay";
 import { TrendChart } from "@/components/pressure/TrendChart";
@@ -18,6 +18,8 @@ export default function PressurePage() {
 
   const matrix = latest?.matrix ?? null;
   const avgPressure = matrix ? Math.round(matrix.reduce((a, b) => a + b, 0) / matrix.length) : null;
+  const alertLevel = latest?.alert_level;
+
   const { label: riskLabel } = avgPressure !== null ? safetyLabel(avgPressure >= P_CAUTION ? 30 : avgPressure >= P_NORMAL ? 60 : 90) : { label: null };
 
   const trendData =
@@ -31,7 +33,7 @@ export default function PressurePage() {
       )
     : null;
 
-  const severity = avgPressure === null ? null : avgPressure >= P_EMERGENCY ? "critical" : avgPressure >= P_CAUTION ? "critical" : avgPressure >= P_NORMAL ? "warning" : "safe";
+  const severity = avgPressure === null ? null : alertLevel ? alertLevelToSeverity(alertLevel) : avgPressure >= P_EMERGENCY ? "critical" : avgPressure >= P_CAUTION ? "high" : avgPressure >= P_NORMAL ? "warning" : "safe";
 
   return (
     <div className="grid gap-5" style={{ gridTemplateColumns: "1fr 340px", alignItems: "start" }}>
@@ -42,7 +44,7 @@ export default function PressurePage() {
             Pression Moyenne Actuelle
           </p>
           <div className="flex items-end gap-4">
-            <MmhgDisplay value={avgPressure} />
+            <MmhgDisplay value={avgPressure} alertLevel={alertLevel} />
             <div className="mb-1">
               <SeverityBadge severity={severity} />
               <p className="text-[11px] text-gray-400 mt-1">Urgence: {P_EMERGENCY} mmHg / Repositionnement: {P_CAUTION} mmHg / Prévention: {P_NORMAL} mmHg</p>

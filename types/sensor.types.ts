@@ -1,4 +1,6 @@
 // Sensor data types
+export type AlertLevel = "normal" | "prevention" | "caution" | "repositionnement" | "urgence";
+
 export interface SensorMatrix {
   patient_id: string;
   timestamp: Date;
@@ -43,6 +45,7 @@ export interface Esp32Payload {
   pos: PatientPosition;
   hum: number;
   uptime: number;
+  alert_level?: AlertLevel;
 }
 
 // Processed sensor update pushed to frontend via SSE
@@ -54,4 +57,5 @@ export interface SensorUpdate {
   position: PatientPosition;
   humidity: number;
   safety_score: number; // 0-100
+  alert_level?: AlertLevel;
 }

@@ -86,11 +86,10 @@ export function getMqttClient(): MqttClient | null {
         esp32_uptime_ms: data.uptime,
       });
 
-      // Alert logic: check each zone against default threshold 32 mmHg
-      const THRESHOLD = 32;
+      // Alert logic: create DB alert when zone crosses repositionnement threshold
       for (const [zoneName, stats] of Object.entries(zones)) {
-        if (stats.avg > THRESHOLD) {
-          const severity = stats.avg > 45 ? "critical" : stats.avg > 35 ? "warning" : "info";
+        if (stats.avg >= 32) {
+          const severity = stats.avg >= 40 ? "critical" : "warning";
           // Only create alert if no active alert exists for same patient+zone
           const existing = await Alert.findOne({
             patient_id: data.patient_id,
@@ -104,7 +103,7 @@ export function getMqttClient(): MqttClient | null {
               zone: zoneName,
               pressure_mmhg: Math.round(stats.avg),
               duration_min: 0,
-              threshold_mmhg: THRESHOLD,
+              threshold_mmhg: 32,
               status: "active",
             });
           }
@@ -113,13 +112,14 @@ export function getMqttClient(): MqttClient | null {
 
       // Push to SSE store
       sensorStore.emit("sensor-update", {
-        patient_id: data.patient_id,
-        timestamp: data.ts,
-        matrix: data.matrix,
+        patient_id:  data.patient_id,
+        timestamp:   data.ts,
+        matrix:      data.matrix,
         zones,
-        position: data.pos,
-        humidity: data.hum,
+        position:    data.pos,
+        humidity:    data.hum,
         safety_score,
+        alert_level: data.alert_level,
       });
     } catch (err) {
       console.error("[MQTT] Processing error:", err);

@@ -1,4 +1,4 @@
-import type { PressureLevel, ZoneName, ZoneStats } from "@/types/sensor.types";
+import type { AlertLevel, PressureLevel, ZoneName, ZoneStats } from "@/types/sensor.types";
 
 // ─── Clinical pressure thresholds (mmHg) ─────────────────────────────────────
 // 🟢 P < 30       → Normal
@@ -17,6 +17,26 @@ export const ZONE_INDICES: Record<ZoneName, number[]> = {
   legs:      [23, 24, 25, 26, 27, 28, 29, 30, 31],
   heels:     [32, 33, 34, 35, 36, 37, 38, 39],
 };
+
+export function alertLevelToColor(level: AlertLevel): string {
+  switch (level) {
+    case "urgence":          return "#ba1a1a"; // P ≥ 40 OR P ≥ 32 > 2h — crimson
+    case "repositionnement": return "#f97316"; // P ≥ 32, 30min–2h — orange-red
+    case "caution":          return "#f97316"; // P ≥ 32, < 30min — orange-red (early)
+    case "prevention":       return "#f59e0b"; // 30 ≤ P < 32 — amber
+    case "normal":  default: return "#006e11"; // P < 30 — green
+  }
+}
+
+export function alertLevelToSeverity(level: AlertLevel): "critical" | "high" | "warning" | "safe" {
+  switch (level) {
+    case "urgence":          return "critical";
+    case "repositionnement": return "high";
+    case "caution":          return "high";
+    case "prevention":       return "warning";
+    case "normal":  default: return "safe";
+  }
+}
 
 export function mmHgToLevel(value: number): PressureLevel {
   if (value >= P_CAUTION) return "critical";

@@ -30,7 +30,7 @@ export function BodyHeatmap({ matrix, onNodeClick }: BodyHeatmapProps) {
   if (!matrix || matrix.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-400 text-xs">
-        En attente des capteurs\u2026
+        En attente des capteurs…
       </div>
     );
   }

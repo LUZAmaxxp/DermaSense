@@ -4,11 +4,11 @@ import type { AlertSeverity } from "@/types/alert.types";
 type ExtendedSeverity = AlertSeverity | "high" | "safe";
 
 const config: Record<ExtendedSeverity, { label: string; bg: string; color: string }> = {
-  critical: { label: "Critique",       bg: "#fee2e2", color: "#ba1a1a" },
-  warning:  { label: "Avertissement",  bg: "#fef3c7", color: "#92400e" },
-  high:     { label: "Élevé",          bg: "#ffedd5", color: "#c2410c" },
-  info:     { label: "Info",           bg: "#eff6ff", color: "#003f7b" },
-  safe:     { label: "Sûr",            bg: "#dcfce7", color: "#006e11" },
+  critical: { label: "Urgence 🚨",          bg: "#fee2e2", color: "#ba1a1a" },
+  high:     { label: "Repositionnement 🔴",   bg: "#ffedd5", color: "#c2410c" },
+  warning:  { label: "Prévention 🟠",        bg: "#fef3c7", color: "#92400e" },
+  info:     { label: "Info",               bg: "#eff6ff", color: "#003f7b" },
+  safe:     { label: "Normal 🟢",           bg: "#dcfce7", color: "#006e11" },
 };
 
 interface SeverityBadgeProps {
