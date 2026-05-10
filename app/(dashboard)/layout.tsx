@@ -7,8 +7,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <TopAppBar />
       <Sidebar />
       <main
-        className="min-h-[calc(100vh-56px)]"
-        style={{ marginTop: 56, marginLeft: 64, padding: 20 }}
+        className="min-h-[calc(100vh-80px)] ml-20 peer-hover:ml-64 transition-[margin] duration-300 ease-in-out"
+        style={{ marginTop: 80, padding: 20 }}
       >
         {children}
       </main>

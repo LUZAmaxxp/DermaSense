@@ -18,7 +18,7 @@ export default function MonitoringPage() {
   const score = matrix ? computeSafetyScore(matrix) : null;
 
   return (
-    <div className="grid gap-5" style={{ gridTemplateColumns: "420px 1fr", alignItems: "start" }}>
+    <div className="grid gap-5" style={{ gridTemplateColumns: "minmax(0, 400px) minmax(0, 1fr)", alignItems: "start" }}>
 
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         <div className="flex items-center justify-between mb-4">
