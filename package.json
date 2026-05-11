@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "seed": "tsx scripts/seed-user.ts",
+    "mock": "tsx scripts/mock-sensor.ts",
+    "mock:urgence": "tsx scripts/mock-sensor.ts --scenario urgence --interval 2000",
+    "mock:escalate": "tsx scripts/mock-sensor.ts --escalate 5 --interval 3000"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
@@ -53,6 +57,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

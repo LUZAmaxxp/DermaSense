@@ -1,15 +1,22 @@
 "use client";
+
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Fingerprint, Activity, Shield, Heart, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Activity, Shield, BarChart2, Lock, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { LoginSchema, type LoginInput } from "@/lib/validations/settings.schema";
 
+/**
+ * DermaSense LoginPage
+ * 
+ * Recreated with exact visual fidelity to the reference image.
+ * Maintains form logic, Next-Auth integration, and Lucide icons.
+ */
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +27,13 @@ export default function LoginPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginInput>({ resolver: zodResolver(LoginSchema) });
+  } = useForm<LoginInput>({ 
+    resolver: zodResolver(LoginSchema),
+    defaultValues: {
+      email: "",
+      password: ""
+    }
+  });
 
   const onSubmit = async (data: LoginInput) => {
     setLoading(true);
@@ -39,159 +52,175 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#f8fafc] font-sans selection:bg-primary/10">
-      {/* Left panel — immersive clinical visual */}
-      <div className="hidden lg:flex relative w-[520px] flex-shrink-0 overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-slate-50" style={{ fontFamily: "'Manrope', sans-serif" }}>
+      
+      {/* ── Background Image Layer ───────────────────────────────────── */}
+      <div className="absolute inset-0 z-0">
         <img
-          src="/pexels-photo-7659571.jpeg"
-          alt="DermaSense clinical monitoring"
-          className="absolute inset-0 w-full h-full object-cover"
+          src="/patient.png"
+          alt="DermaSense patient monitoring"
+          className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#001f3f]/80 via-[#001f3f]/40 to-transparent" />
+        {/* Soft overlay to ensure text contrast while keeping the clinical feel */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/60 via-white/20 to-transparent" />
+      </div>
+
+      {/* ── Centered Logo Header ─────────────────────────────────────── */}
+      <div className="absolute top-0 left-0 right-0 z-20 h-[110px] flex items-center justify-center">
+        <div className="flex items-center gap-4">
+          <img
+            src="/WhatsApp_Image_2026-05-10_at_10.43.42-removebg-preview.png"
+            alt="DermaSense Logo"
+            className="h-16 w-auto"
+          />
+          <span className="text-4xl font-black tracking-tighter">
+            <span className="text-[#001f3f]">DERMA</span><span className="text-[#006e11]">SENSE</span>
+          </span>
+          <div className="w-px h-10 bg-slate-400 mx-3" />
+          <div className="flex flex-col text-[13px] font-bold uppercase leading-tight tracking-[0.15em]">
+            <span className="text-slate-500">L'INTELLIGENCE</span>
+            <span className="text-[#006e11]">AU SERVICE DE LA PREVENTION</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Main Layout Container ────────────────────────────────────── */}
+      <main className="relative z-10 min-h-screen flex items-center justify-center pt-[110px]">
         
-        {/* Branding & Features overlay */}
-        <div className="absolute inset-0 flex flex-col justify-between p-12 py-16">
-          <div className="flex items-center gap-4 group">
-            <div className="w-14 h-14 rounded-2xl bg-white backdrop-blur-xl flex items-center justify-center border border-white/30 shadow-2xl transition-transform group-hover:scale-105">
-              <span className="text-white text-xl font-extrabold tracking-tighter" style={{ fontFamily: "Manrope, sans-serif" }}>
-                <img
-                  src="/WhatsApp_Image_2026-05-10_at_10.43.42-removebg-preview.png"
-                  alt="DermaSense"
-                  className="h-12 w-auto object-contain"
-                />
-              </span>
+        {/* Left Side: Tagline & Values */}
+        <div className="absolute left-0 top-[110px] bottom-0 w-[42%] flex items-center pl-14 pr-8">
+          <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
+            <div className="space-y-4">
+              <h1 className="text-[#001f3f] text-[3.5rem] font-black leading-[1.1] tracking-tight">
+              Innovation Medical<br />Pour <br /> La Protection Cutanée
+              </h1>
+              <p className="text-slate-600 text-lg leading-relaxed max-w-[440px]">
+                Surveillance intelligente, confort optimal et meilleure prise en charge des patients.
+              </p>
             </div>
-            <div>
-              <span className="text-white text-3xl font-bold tracking-tight block leading-none" style={{ fontFamily: "Manrope, sans-serif" }}>
-                DERMASENSE
-              </span>
-              <p className="text-blue-200/80 text-[11px] uppercase tracking-[0.2em] mt-1 font-semibold">Surveillance Clinique</p>
-            </div>
-          </div>
 
-          <div className="space-y-6 max-w-[320px] p-8 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 shadow-inner">
-            {[
-              { icon: Shield,   label: "Temps réel",         sub: "Données live toutes les 5s" },
-              { icon: Activity, label: "MQTT IoT",            sub: "ESP32 + HiveMQ Cloud" },
-              { icon: Heart,    label: "Prévention escarre",  sub: "Protocoles cliniques intégrés" },
-            ].map(({ icon: Icon, label, sub }) => (
-              <div key={label} className="flex items-center gap-5 group/item">
-                <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 border border-white/5 group-hover/item:bg-white/20 transition-colors">
-                  <Icon size={20} className="text-blue-100" />
+            <div className="flex gap-12">
+              {[
+                { icon: Shield, label: "PRÉVENIR" },
+                { icon: Activity, label: "SURVEILLER" },
+                { icon: BarChart2, label: "PROTÉGER" },
+              ].map(({ icon: Icon, label }) => (
+                <div key={label} className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 rounded-full bg-white/80 border border-[#001f3f]/10 flex items-center justify-center shadow-sm backdrop-blur-sm">
+                    <Icon size={28} className="text-[#001f3f]" strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[#001f3f] text-[10px] font-bold tracking-[0.2em]">{label}</span>
                 </div>
-                <div>
-                  <p className="text-white text-sm font-bold tracking-tight" style={{ fontFamily: "Manrope, sans-serif" }}>{label}</p>
-                  <p className="text-blue-200/60 text-xs mt-0.5">{sub}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Right panel — refined form */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
-        <div className="w-full max-w-[420px] animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="mb-10 text-center lg:text-left">
-            <h1 className="text-3xl font-extrabold text-[#001f3f] tracking-tight" style={{ fontFamily: "Manrope, sans-serif" }}>
-              Connexion
-            </h1>
-            <p className="text-slate-500 mt-2 font-medium">Accédez à votre tableau de bord clinique</p>
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div className="space-y-2">
-              <Label className="text-[11px] uppercase tracking-widest text-slate-400 font-bold ml-1">Adresse email</Label>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={18} />
-                <Input
-                  type="email"
-                  placeholder="infirmier@clinique.ma"
-                  autoComplete="email"
-                  className="h-13 pl-11 rounded-2xl bg-white border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all"
-                  {...register("email")}
-                />
-              </div>
-              {errors.email && <p className="text-xs font-semibold text-red-500 mt-1 ml-1">{errors.email.message}</p>}
+        {/* Center: Login Card */}
+        <div className="flex justify-center w-full">
+          <div className="w-full max-w-[420px] bg-white rounded-[2rem] shadow-2xl shadow-black/10 p-10 animate-in fade-in zoom-in-95 duration-500">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-black text-[#001f3f] tracking-tight">Connexion</h2>
+              <p className="text-slate-400 mt-2">Accédez à votre espace Dermasense</p>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center ml-1">
-                <Label className="text-[11px] uppercase tracking-widest text-slate-400 font-bold">Mot de passe</Label>
-                <button type="button" className="text-[11px] font-bold text-primary hover:underline underline-offset-4">Mot de passe oublié ?</button>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              {/* Email Field */}
+              <div className="space-y-2">
+                <Label className="text-[13px] font-bold text-slate-700 uppercase tracking-wide">Email</Label>
+                <div className="relative group">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#001f3f] transition-colors" size={18} />
+                  <Input
+                    type="email"
+                    placeholder="Entrez votre email"
+                    className="pl-12 h-14 rounded-2xl border-slate-200 bg-slate-50/50 text-sm focus:border-[#001f3f] focus:ring-4 focus:ring-[#001f3f]/5 transition-all"
+                    {...register("email")}
+                  />
+                </div>
+                {errors.email && <p className="text-xs text-red-500 font-medium pl-1">{errors.email.message}</p>}
               </div>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={18} />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  className="h-13 pl-11 pr-12 rounded-2xl bg-white border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all"
-                  {...register("password")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+
+              {/* Password Field */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center px-1">
+                  <Label className="text-[13px] font-bold text-slate-700 uppercase tracking-wide">Mot de passe</Label>
+                  <button type="button" className="text-xs font-bold text-[#001f3f] hover:underline underline-offset-4">
+                    Mot de passe oublié ?
+                  </button>
+                </div>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#001f3f] transition-colors" size={18} />
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Entrez votre mot de passe"
+                    className="pl-12 pr-12 h-14 rounded-2xl border-slate-200 bg-slate-50/50 text-sm focus:border-[#001f3f] focus:ring-4 focus:ring-[#001f3f]/5 transition-all"
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-xs text-red-500 font-medium pl-1">{errors.password.message}</p>}
               </div>
-              {errors.password && <p className="text-xs font-semibold text-red-500 mt-1 ml-1">{errors.password.message}</p>}
+
+              {error && (
+                <div className="bg-red-50 border border-red-100 text-red-600 text-[13px] rounded-xl px-4 py-3 flex items-center gap-2">
+                   <div className="w-1.5 h-1.5 rounded-full bg-red-600" />
+                   {error}
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-14 bg-[#001f3f] hover:bg-[#002d5c] text-white font-bold rounded-2xl text-base shadow-xl shadow-[#001f3f]/20 active:scale-[0.98] transition-all"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <Activity className="animate-spin" size={18} />
+                    Connexion...
+                  </span>
+                ) : "Se connecter"}
+              </Button>
+            </form>
+
+            {/* Divider */}
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-100" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-4 text-slate-400 font-medium">ou</span>
+              </div>
             </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-100 text-red-600 text-sm font-medium rounded-2xl px-4 py-3 flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                {error}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-13 bg-[#001f3f] hover:bg-[#002d5c] text-white font-bold rounded-2xl shadow-xl shadow-blue-900/10 active:scale-[0.98] transition-all text-base mt-2"
+            {/* SSO Action */}
+            <button
+              type="button"
+              className="w-full h-14 flex items-center justify-center gap-3 rounded-2xl border-2 border-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-50 hover:border-slate-200 transition-all"
             >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <Activity className="animate-pulse" size={18} />
-                  Connexion...
-                </span>
-              ) : "Se connecter"}
-            </Button>
-          </form>
-
-          {/* Biometric row */}
-          <div className="mt-10 relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-100" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-[#f8fafc] px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">BIOMÉTRIE</span>
-            </div>
-          </div>
-          
-          <div className="mt-8 flex justify-center gap-6">
-            <button type="button" className="group flex flex-col items-center gap-2 p-5 w-28 rounded-2xl border border-slate-100 bg-white hover:border-primary hover:shadow-lg hover:shadow-primary/5 transition-all active:scale-95" aria-label="Empreinte digitale">
-              <Fingerprint size={28} className="text-slate-300 group-hover:text-primary transition-colors" />
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">Empreinte</span>
+              <Shield size={18} className="text-[#001f3f]/40" />
+              Se connecter via SSO
             </button>
-            <button type="button" className="group flex flex-col items-center gap-2 p-5 w-28 rounded-2xl border border-slate-100 bg-white hover:border-primary hover:shadow-lg hover:shadow-primary/5 transition-all active:scale-95" aria-label="Face ID">
-              <div className="relative">
-                 <Activity size={28} className="text-slate-300 group-hover:text-primary transition-colors" />
-              </div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">Face ID</span>
-            </button>
-          </div>
 
-          <footer className="mt-12 text-center">
-            <p className="text-[10px] text-slate-400 font-medium tracking-wide">
-              Système sécurisé ClinicaPulse v4.0.1<br/>
-              © 2024 ClinicaPulse Systems. HIPAA Compliant.
+            {/* Footer Registration */}
+            <p className="text-center text-sm text-slate-400 mt-8">
+              Vous n'avez pas de compte ?{" "}
+              <button className="text-[#001f3f] font-bold hover:underline underline-offset-4">
+                Contactez votre administrateur
+              </button>
             </p>
-          </footer>
+          </div>
         </div>
-      </div>
+      </main>
+
+      {/* Decorative Blur Elements */}
+      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#001f3f]/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 -right-24 w-64 h-64 bg-green-600/5 rounded-full blur-[80px] pointer-events-none" />
     </div>
   );
 }
