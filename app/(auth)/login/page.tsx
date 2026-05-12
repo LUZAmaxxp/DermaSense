@@ -9,6 +9,7 @@ import { Eye, EyeOff, Activity, Shield, BarChart2, Lock, Mail } from "lucide-rea
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 import { LoginSchema, type LoginInput } from "@/lib/validations/settings.schema";
 
 /**
@@ -239,9 +240,9 @@ export default function LoginPage() {
             {/* Footer Registration */}
             <p className="text-center text-sm text-slate-400 mt-8">
               Vous n'avez pas de compte ?{" "}
-              <button className="text-[#001f3f] font-bold hover:underline underline-offset-4">
-                Contactez votre administrateur
-              </button>
+              <Link href="/signup" className="text-[#001f3f] font-bold hover:underline underline-offset-4">
+                Créer un compte
+              </Link>
             </p>
           </div>
         </div>

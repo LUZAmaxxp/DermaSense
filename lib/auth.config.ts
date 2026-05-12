@@ -14,10 +14,11 @@ export const authConfig: NextAuthConfig = {
   callbacks: {
     authorized({ auth, request }) {
       const isLoggedIn = !!auth?.user;
-      const isLoginPage = request.nextUrl.pathname === "/login";
+      const { pathname } = request.nextUrl;
+      const isPublicPage = pathname === "/login" || pathname === "/signup";
 
-      if (!isLoggedIn && !isLoginPage) return false;   // redirect to signIn page
-      if (isLoggedIn && isLoginPage) {
+      if (!isLoggedIn && !isPublicPage) return false;  // redirect to signIn page
+      if (isLoggedIn && isPublicPage) {
         return Response.redirect(new URL("/", request.nextUrl));
       }
       return true;

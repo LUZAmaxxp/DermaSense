@@ -3,8 +3,22 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Bell, Settings, HelpCircle, ChevronDown, Menu, X, Home, Activity, TrendingUp, BarChart2, ShieldAlert } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useAlertStore } from "@/store/useAlertStore";
+import { usePatientStore } from "@/store/usePatientStore";
 import { useMqttStatus } from "@/hooks/useMqttStatus";
+import { PatientSwitcher } from "./PatientSwitcher";
+
+function initials(name: string | null | undefined) {
+  if (!name) return "?";
+  return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+}
+
+const ROLE_LABEL: Record<string, string> = {
+  nurse: "Infirmier(ère)",
+  doctor: "Médecin",
+  admin: "Administrateur",
+};
 
 const NAV = [
   { label: "Accueil",         href: "/" },
@@ -20,6 +34,11 @@ export function TopAppBar() {
   const { connected } = useMqttStatus();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { data: session } = useSession();
+
+  const userName = session?.user?.name ?? "—";
+  const userRole = (session?.user as { role?: string })?.role ?? "nurse";
+  const userInitials = initials(session?.user?.name);
 
   return (
     <>
@@ -57,34 +76,9 @@ export function TopAppBar() {
           </nav>
         </div>
 
-        {/* Center: Patient Context — hidden on mobile */}
+        {/* Center: Patient Switcher — hidden on mobile */}
         <div className="absolute left-1/2 -translate-x-1/2 hidden md:block">
-          <div className="flex items-center gap-4 bg-slate-50 border border-slate-100 rounded-2xl p-1.5 pr-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center border border-blue-200">
-                <span className="text-blue-700 text-xs font-black">OS</span>
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-[#001f3f]" style={{ fontFamily: "Manrope, sans-serif" }}>
-                    Ouiame Salimi
-                  </span>
-                  <span className="bg-[#001f3f]/5 text-[#001f3f] text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider">
-                    #7724
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Gériatrie • Unité Alpha</p>
-              </div>
-            </div>
-            <div className="h-6 w-px bg-slate-200 mx-2" />
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${connected ? "bg-emerald-500 animate-pulse" : "bg-red-500"}`} />
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Live</span>
-              </div>
-              <ChevronDown size={14} className="text-slate-300" />
-            </div>
-          </div>
+          <PatientSwitcher />
         </div>
 
         {/* Right: Actions & Profile */}
@@ -110,11 +104,11 @@ export function TopAppBar() {
 
           <div className="flex items-center gap-3 pl-2">
             <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-[#001f3f]" style={{ fontFamily: "Manrope, sans-serif" }}>Dr. N. Salimi</p>
-              <p className="text-[10px] text-slate-400 font-medium">Chef de Service</p>
+              <p className="text-xs font-bold text-[#001f3f]" style={{ fontFamily: "Manrope, sans-serif" }}>{userName}</p>
+              <p className="text-[10px] text-slate-400 font-medium">{ROLE_LABEL[userRole] ?? userRole}</p>
             </div>
             <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-[#001f3f]/10 transition-all cursor-pointer">
-              <span className="text-slate-400 text-xs font-bold uppercase">NS</span>
+              <span className="text-slate-400 text-xs font-bold uppercase">{userInitials}</span>
             </div>
           </div>
 
@@ -152,19 +146,9 @@ export function TopAppBar() {
           </button>
         </div>
 
-        {/* Patient info */}
-        <div className="mx-4 mt-4 p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center border border-blue-200 flex-shrink-0">
-            <span className="text-blue-700 text-xs font-black">OS</span>
-          </div>
-          <div>
-            <p className="text-sm font-bold text-[#001f3f]">Ouiame Salimi</p>
-            <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-tight">Gériatrie • #7724</p>
-          </div>
-          <div className="ml-auto flex items-center gap-1.5">
-            <div className={`w-2 h-2 rounded-full ${connected ? "bg-emerald-500 animate-pulse" : "bg-red-400"}`} />
-            <span className="text-[10px] font-bold text-slate-400">Live</span>
-          </div>
+        {/* Patient switcher */}
+        <div className="mx-4 mt-4">
+          <PatientSwitcher />
         </div>
 
         {/* Nav links */}
