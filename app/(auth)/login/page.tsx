@@ -105,9 +105,56 @@ export default function LoginPage() {
         </div>
 
       {/* ── Main: full-screen centered form ─────────────────────────── */}
-      <main className="relative z-10 min-h-screen flex items-center justify-center">
+      <main className="relative z-10 min-h-screen flex flex-col items-center justify-center py-8 lg:py-0">
+
+        {/* ── Mobile logo header — only shown below lg breakpoint ── */}
+        <div className="flex lg:hidden flex-col items-center w-full px-5 mb-5 animate-in fade-in slide-in-from-top-6 duration-600">
+          {/* Brand card */}
+          <div className="w-full max-w-[380px] bg-white/80 backdrop-blur-xl rounded-[2rem] px-6 pt-6 pb-5 flex flex-col items-center gap-3 shadow-2xl shadow-black/15 border border-white/70">
+
+            {/* Logo with glow halo */}
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-[#006e11]/10 blur-2xl scale-150" />
+              <img
+                src="/WhatsApp_Image_2026-05-10_at_10.43.42-removebg-preview.png"
+                alt="DermaSense Logo"
+                className="relative h-24 w-auto drop-shadow-lg"
+              />
+            </div>
+
+            {/* Brand name */}
+            <div className="flex items-baseline leading-none">
+              <span className="text-[2rem] font-black text-[#001f3f] tracking-tight">DERMA</span>
+              <span className="text-[2rem] font-black text-[#006e11] tracking-tight">SENSE</span>
+            </div>
+
+            {/* Green accent bar */}
+            <div className="flex items-center gap-2 w-full justify-center">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#006e11]/40" />
+              <span className="text-[9px] font-bold tracking-[0.2em] text-[#006e11] uppercase">Surveillance des escarres</span>
+              <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#006e11]/40" />
+            </div>
+
+            {/* Three feature badges */}
+            <div className="flex gap-3 w-full justify-center pt-1">
+              {[
+                { icon: Shield, label: "PRÉVENIR" },
+                { icon: Activity, label: "SURVEILLER" },
+                { icon: BarChart2, label: "PROTÉGER" },
+              ].map(({ icon: Icon, label }) => (
+                <div key={label} className="flex flex-col items-center gap-1.5">
+                  <div className="w-11 h-11 rounded-2xl bg-[#001f3f]/5 border border-[#001f3f]/8 flex items-center justify-center">
+                    <Icon size={18} className="text-[#001f3f]" strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[8px] font-bold tracking-[0.15em] text-slate-500">{label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         <div>
-          <div className="w-full max-w-[420px] bg-white rounded-[2rem] shadow-2xl shadow-black/10 p-10 animate-in fade-in zoom-in-95 duration-500">
+          <div className="w-full max-w-[420px] bg-white rounded-[2rem] shadow-2xl shadow-black/10 p-6 sm:p-10 animate-in fade-in zoom-in-95 duration-500">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-black text-[#001f3f] tracking-tight">Connexion</h2>
               <p className="text-slate-400 mt-2">Accédez à votre espace Dermasense</p>
