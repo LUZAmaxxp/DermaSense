@@ -153,7 +153,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div>
+        <div className="w-full px-5 sm:px-0 sm:w-auto">
           <div className="w-full max-w-[420px] bg-white rounded-[2rem] shadow-2xl shadow-black/10 p-6 sm:p-10 animate-in fade-in zoom-in-95 duration-500">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-black text-[#001f3f] tracking-tight">Connexion</h2>
