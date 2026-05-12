@@ -11,6 +11,7 @@ import mqtt, { MqttClient } from "mqtt";
 import { SensorPayloadSchema } from "./validations/sensor.schema";
 import { computeAllZones, computeSafetyScore } from "./utils/pressure";
 import { sensorStore } from "./mqtt-store";
+import { getRedis, SENSOR_STREAM } from "./redis";
 import { connectDB } from "./mongodb";
 import { SensorReading } from "@/models/SensorReading";
 import { Alert } from "@/models/Alert";
@@ -116,8 +117,8 @@ export function getMqttClient(): MqttClient | null {
         }
       }
 
-      // Push to SSE store
-      sensorStore.emit("sensor-update", {
+      // Push to SSE store (local dev EventEmitter)
+      const update = {
         patient_id:  data.patient_id,
         timestamp:   data.ts,
         matrix:      data.matrix,
@@ -126,7 +127,14 @@ export function getMqttClient(): MqttClient | null {
         humidity:    data.hum,
         safety_score,
         alert_level: data.alert_level,
-      });
+      };
+      sensorStore.emit("sensor-update", update);
+
+      // Publish to Redis stream for Vercel SSE clients (production)
+      const redis = getRedis();
+      if (redis) {
+        await redis.xadd(SENSOR_STREAM, "*", { payload: JSON.stringify(update) });
+      }
     } catch (err) {
       console.error("[MQTT] Processing error:", err);
     }
