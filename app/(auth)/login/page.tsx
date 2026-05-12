@@ -109,8 +109,7 @@ export default function LoginPage() {
 
         {/* ── Mobile logo header — only shown below lg breakpoint ── */}
         <div className="flex lg:hidden flex-col items-center w-full px-5 mb-5 animate-in fade-in slide-in-from-top-6 duration-600">
-          {/* Brand card */}
-          <div className="w-full max-w-[380px] bg-white/80 backdrop-blur-xl rounded-[2rem] px-6 pt-6 pb-5 flex flex-col items-center gap-3 shadow-2xl shadow-black/15 border border-white/70">
+          <div className="w-full max-w-[380px] flex flex-col items-center gap-0.5">
 
             {/* Logo with glow halo */}
             <div className="relative">
@@ -118,35 +117,29 @@ export default function LoginPage() {
               <img
                 src="/WhatsApp_Image_2026-05-10_at_10.43.42-removebg-preview.png"
                 alt="DermaSense Logo"
-                className="relative h-24 w-auto drop-shadow-lg"
+                className="relative h-44 w-auto drop-shadow-xl"
               />
             </div>
 
-            {/* Brand name */}
-            <div className="flex items-baseline leading-none">
-              <span className="text-[2rem] font-black text-[#001f3f] tracking-tight">DERMA</span>
-              <span className="text-[2rem] font-black text-[#006e11] tracking-tight">SENSE</span>
-            </div>
-
             {/* Green accent bar */}
-            <div className="flex items-center gap-2 w-full justify-center">
+            <div className="flex items-center  w-full justify-center -mt-10">
               <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#006e11]/40" />
               <span className="text-[9px] font-bold tracking-[0.2em] text-[#006e11] uppercase">Surveillance des escarres</span>
               <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#006e11]/40" />
             </div>
 
             {/* Three feature badges */}
-            <div className="flex gap-3 w-full justify-center pt-1">
+            <div className="flex gap-5 w-full justify-center pt-1">
               {[
                 { icon: Shield, label: "PRÉVENIR" },
                 { icon: Activity, label: "SURVEILLER" },
                 { icon: BarChart2, label: "PROTÉGER" },
               ].map(({ icon: Icon, label }) => (
                 <div key={label} className="flex flex-col items-center gap-1.5">
-                  <div className="w-11 h-11 rounded-2xl bg-[#001f3f]/5 border border-[#001f3f]/8 flex items-center justify-center">
-                    <Icon size={18} className="text-[#001f3f]" strokeWidth={1.5} />
+                  <div className="w-12 h-12 rounded-2xl bg-white/70 backdrop-blur-sm border border-white/80 flex items-center justify-center shadow-md">
+                    <Icon size={20} className="text-[#001f3f]" strokeWidth={1.5} />
                   </div>
-                  <span className="text-[8px] font-bold tracking-[0.15em] text-slate-500">{label}</span>
+                  <span className="text-[8px] font-bold tracking-[0.15em] text-[#001f3f]/60">{label}</span>
                 </div>
               ))}
             </div>
