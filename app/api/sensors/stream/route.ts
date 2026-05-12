@@ -26,8 +26,9 @@ export async function GET(req: NextRequest) {
           try {
             type StreamEntry = { id: string; data: Record<string, unknown> };
             const results = await redis.xread(
-              { count: 10 },
-              { key: SENSOR_STREAM, id: lastId }
+              SENSOR_STREAM,
+              lastId,
+              { count: 10 }
             ) as [string, StreamEntry[]][] | null;
 
             if (results && results.length > 0) {
