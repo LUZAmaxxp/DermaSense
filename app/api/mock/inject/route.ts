@@ -23,11 +23,6 @@ import { SensorReading } from "@/models/SensorReading";
 import { Alert } from "@/models/Alert";
 import type { PatientPosition } from "@/types/sensor.types";
 
-if (process.env.NODE_ENV === "production") {
-  // Hard-stop at module load so the route is dead in production
-  throw new Error("Mock inject route must not be used in production");
-}
-
 // ─── Realistic matrix generator ──────────────────────────────────────────────
 
 type ScenarioName = "normal" | "prevention" | "caution" | "repositionnement" | "urgence";
@@ -39,67 +34,43 @@ interface MockOptions {
 }
 
 function gaussianRandom(mean: number, std: number): number {
-  // Box–Muller transform
   const u1 = Math.random();
   const u2 = Math.random();
   const z0 = Math.sqrt(-2 * Math.log(u1 + 1e-10)) * Math.cos(2 * Math.PI * u2);
   return Math.max(0, Math.min(300, mean + std * z0));
 }
 
-/**
- * Generate a 40-value pressure matrix that matches the requested clinical scenario.
- * Zone index layout mirrors ZONE_INDICES in lib/utils/pressure.ts:
- *   shoulders [0-7] | thorax [7-14] | sacrum [15-25] | legs [23-31] | heels [32-39]
- */
 function generateMatrix(scenario: ScenarioName, position: PatientPosition): number[] {
-  const matrix = new Array<number>(40).fill(0);
+  const matrix = new Array<number>(10).fill(0);
+  for (let i = 0; i < 10; i++) matrix[i] = gaussianRandom(12, 4);
 
-  // Base low-pressure background (resting tissue)
-  for (let i = 0; i < 40; i++) {
-    matrix[i] = gaussianRandom(12, 4);
-  }
-
-  // Zone pressure overlays per scenario
-  const scenarios: Record<ScenarioName, { zones: number[]; mean: number; std: number }[]> = {
+  const overlays: Record<ScenarioName, { indices: number[]; mean: number; std: number }[]> = {
     normal: [],
-    prevention: [
-      { zones: [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25], mean: 31, std: 2 }, // sacrum ~31 mmHg
-    ],
-    caution: [
-      { zones: [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25], mean: 33, std: 3 }, // sacrum crossing 32
-    ],
+    prevention: [{ indices: [4, 5], mean: 31, std: 2 }],
+    caution: [{ indices: [4, 5], mean: 33, std: 2 }],
     repositionnement: [
-      { zones: [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25], mean: 37, std: 4 }, // sacrum high
-      { zones: [32, 33, 34, 35, 36, 37, 38, 39], mean: 33, std: 3 },             // heels elevated
+      { indices: [4, 5], mean: 37, std: 3 },
+      { indices: [8, 9], mean: 33, std: 2 },
     ],
     urgence: [
-      { zones: [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25], mean: 45, std: 5 }, // sacrum emergency
-      { zones: [32, 33, 34, 35, 36, 37, 38, 39], mean: 38, std: 4 },             // heels high
-      { zones: [0, 1, 2, 3, 4, 5, 6, 7], mean: 35, std: 4 },                    // shoulders elevated
+      { indices: [4, 5], mean: 45, std: 4 },
+      { indices: [8, 9], mean: 38, std: 3 },
+      { indices: [0, 1], mean: 35, std: 3 },
     ],
   };
 
-  // Lateral positions put pressure on one shoulder instead of sacrum
-  if (position === "lateral_droit" || position === "lateral_gauche") {
-    const shoulderSide = position === "lateral_droit" ? [0, 1, 2, 3] : [4, 5, 6, 7];
-    for (const idx of shoulderSide) {
-      matrix[idx] = gaussianRandom(28, 5);
-    }
-  }
+  if (position === "lateral_droit") matrix[0] = gaussianRandom(28, 5);
+  else if (position === "lateral_gauche") matrix[1] = gaussianRandom(28, 5);
 
-  for (const overlay of scenarios[scenario]) {
-    for (const idx of overlay.zones) {
-      matrix[idx] = gaussianRandom(overlay.mean, overlay.std);
-    }
+  for (const overlay of overlays[scenario]) {
+    for (const idx of overlay.indices) matrix[idx] = gaussianRandom(overlay.mean, overlay.std);
   }
-
   return matrix.map((v) => Math.round(v * 10) / 10);
 }
 
 function buildMockPayload(opts: MockOptions) {
   const scenario: ScenarioName = opts.scenario ?? "normal";
   const position: PatientPosition = opts.position ?? "dorsal";
-
   return {
     patient_id: opts.patient_id ?? "7724",
     ts: Date.now(),
@@ -110,9 +81,13 @@ function buildMockPayload(opts: MockOptions) {
   };
 }
 
+export async function POST(req: NextRequest) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
 // ─── Route handler ────────────────────────────────────────────────────────────
 
-export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
 

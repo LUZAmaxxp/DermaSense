@@ -61,63 +61,52 @@ export default function LoginPage() {
           alt="DermaSense patient monitoring"
           className="w-full h-full object-cover"
         />
-        {/* Soft overlay to ensure text contrast while keeping the clinical feel */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white/60 via-white/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/65 via-white/30 to-transparent" />
       </div>
 
-      {/* ── Centered Logo Header ─────────────────────────────────────── */}
-      <div className="absolute top-0 left-0 right-0 z-20 h-[110px] flex items-center justify-center">
-        <div className="flex items-center gap-4">
-          <img
-            src="/WhatsApp_Image_2026-05-10_at_10.43.42-removebg-preview.png"
-            alt="DermaSense Logo"
-            className="h-16 w-auto"
-          />
-          <span className="text-4xl font-black tracking-tighter">
-            <span className="text-[#001f3f]">DERMA</span><span className="text-[#006e11]">SENSE</span>
-          </span>
-          <div className="w-px h-10 bg-slate-400 mx-3" />
-          <div className="flex flex-col text-[13px] font-bold uppercase leading-tight tracking-[0.15em]">
-            <span className="text-slate-500">L'INTELLIGENCE</span>
-            <span className="text-[#006e11]">AU SERVICE DE LA PREVENTION</span>
+      {/* ── Left panel: absolute, logo + tagline + icons ── hidden on mobile */}
+      <div className="hidden lg:flex absolute left-0 top-0 bottom-0 z-20 w-[44%] flex-col justify-start pl-14 pr-8 pt-10 pb-16 space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
+
+          {/* Logo */}
+          <div>
+            <img
+              src="/WhatsApp_Image_2026-05-10_at_10.43.42-removebg-preview.png"
+              alt="DermaSense Logo"
+              className="h-64 w-auto"
+            />
           </div>
-        </div>
-      </div>
 
-      {/* ── Main Layout Container ────────────────────────────────────── */}
-      <main className="relative z-10 min-h-screen flex items-center justify-center pt-[110px]">
-        
-        {/* Left Side: Tagline & Values */}
-        <div className="absolute left-0 top-[110px] bottom-0 w-[42%] flex items-center pl-14 pr-8">
-          <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
-            <div className="space-y-4">
-              <h1 className="text-[#001f3f] text-[3.5rem] font-black leading-[1.1] tracking-tight">
-              Innovation Medical<br />Pour <br /> La Protection Cutanée
-              </h1>
-              <p className="text-slate-600 text-lg leading-relaxed max-w-[440px]">
-                Surveillance intelligente, confort optimal et meilleure prise en charge des patients.
-              </p>
-            </div>
+          {/* Tagline */}
+          <div className="space-y-3">
+            <h1 className="text-[#001f3f] text-[1.75rem] font-black leading-snug tracking-tight uppercase">
+              TECHNOLOGIE AU SERVICE DE LA<br />
+              <span className="text-[#006e11]">PRÉVENTION DES ESCARRES</span>
+            </h1>
+            <p className="text-slate-600 text-base leading-relaxed max-w-[420px]">
+              Surveillance intelligente, confort optimal et meilleure prise en charge des patients.
+            </p>
+          </div>
 
-            <div className="flex gap-12">
-              {[
-                { icon: Shield, label: "PRÉVENIR" },
-                { icon: Activity, label: "SURVEILLER" },
-                { icon: BarChart2, label: "PROTÉGER" },
-              ].map(({ icon: Icon, label }) => (
-                <div key={label} className="flex flex-col items-center gap-3">
-                  <div className="w-16 h-16 rounded-full bg-white/80 border border-[#001f3f]/10 flex items-center justify-center shadow-sm backdrop-blur-sm">
-                    <Icon size={28} className="text-[#001f3f]" strokeWidth={1.5} />
-                  </div>
-                  <span className="text-[#001f3f] text-[10px] font-bold tracking-[0.2em]">{label}</span>
+          {/* Three icons */}
+          <div className="flex gap-10">
+            {[
+              { icon: Shield, label: "PRÉVENIR" },
+              { icon: Activity, label: "SURVEILLER" },
+              { icon: BarChart2, label: "PROTÉGER" },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} className="flex flex-col items-center gap-2">
+                <div className="w-16 h-16 rounded-full bg-white/80 border border-[#001f3f]/10 flex items-center justify-center shadow-sm backdrop-blur-sm">
+                  <Icon size={28} className="text-[#001f3f]" strokeWidth={1.5} />
                 </div>
-              ))}
-            </div>
+                <span className="text-[#001f3f] text-[10px] font-bold tracking-[0.2em]">{label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Center: Login Card */}
-        <div className="flex justify-center w-full">
+      {/* ── Main: full-screen centered form ─────────────────────────── */}
+      <main className="relative z-10 min-h-screen flex items-center justify-center">
+        <div>
           <div className="w-full max-w-[420px] bg-white rounded-[2rem] shadow-2xl shadow-black/10 p-10 animate-in fade-in zoom-in-95 duration-500">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-black text-[#001f3f] tracking-tight">Connexion</h2>

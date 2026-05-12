@@ -35,7 +35,7 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="grid gap-5" style={{ gridTemplateColumns: "1fr 320px", alignItems: "start" }}>
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 items-start">
 
       <div>
         <div className="flex items-center justify-between mb-4">

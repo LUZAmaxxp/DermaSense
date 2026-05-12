@@ -18,9 +18,9 @@ export default function MonitoringPage() {
   const score = matrix ? computeSafetyScore(matrix) : null;
 
   return (
-    <div className="grid gap-5" style={{ gridTemplateColumns: "minmax(0, 400px) minmax(0, 1fr)", alignItems: "start" }}>
+    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] gap-5 items-start">
 
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-base font-bold text-gray-900" style={{ fontFamily: "Manrope, sans-serif" }}>
@@ -36,27 +36,28 @@ export default function MonitoringPage() {
       </div>
 
       <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           {[
             { label: "Pression Moy.", value: avgPressure !== null ? avgPressure : null, unit: "mmHg", color: avgPressure !== null ? mmHgToColor(avgPressure) : "#d1d5db" },
             { label: "Score Global",   value: score !== null ? score + "%" : null, unit: "",     color: score !== null ? (score >= 80 ? "#006e11" : score >= 60 ? "#f59e0b" : "#ba1a1a") : "#d1d5db" },
             { label: "Capteurs Actifs",value: latest ? "40" : null, unit: "/40",  color: "#003f7b" },
           ].map(({ label, value, unit, color }) => (
-            <div key={label} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm text-center">
-              <p className="text-[10px] text-gray-500 font-medium uppercase tracking-wide">{label}</p>
-              <p className="text-3xl font-bold mt-1" style={{ fontFamily: "Manrope, sans-serif", color: value !== null ? color : "#d1d5db" }}>
+            <div key={label} className="bg-white rounded-xl p-3 sm:p-4 border border-gray-100 shadow-sm text-center">
+              <p className="text-[9px] sm:text-[10px] text-gray-500 font-medium uppercase tracking-wide leading-tight">{label}</p>
+              <p className="text-xl sm:text-3xl font-bold mt-1" style={{ fontFamily: "Manrope, sans-serif", color: value !== null ? color : "#d1d5db" }}>
                 {value !== null ? value : "\u2014"}
-                {value !== null && unit && <span className="text-sm font-normal text-gray-400 ml-0.5">{unit}</span>}
+                {value !== null && unit && <span className="text-[10px] sm:text-sm font-normal text-gray-400 ml-0.5">{unit}</span>}
               </p>
             </div>
           ))}
         </div>
 
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-4">
             Repartition par Zone
           </p>
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-1">
+          <table className="w-full text-sm min-w-[280px]">
             <thead>
               <tr className="text-[10px] text-gray-400 uppercase">
                 <th className="text-left py-1 font-medium">Zone</th>
@@ -101,9 +102,10 @@ export default function MonitoringPage() {
                 )}
             </tbody>
           </table>
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-4">
             Historique de Position
           </p>

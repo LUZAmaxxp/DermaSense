@@ -20,7 +20,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="grid gap-5" style={{ gridTemplateColumns: "1fr 1fr", alignItems: "start" }}>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
 
       {/* Col 1 */}
       <div className="space-y-4">

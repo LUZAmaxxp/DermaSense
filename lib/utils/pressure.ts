@@ -1,4 +1,4 @@
-import type { AlertLevel, PressureLevel, ZoneName, ZoneStats } from "@/types/sensor.types";
+import type { AlertLevel, PressureLevel, SensorLabel, ZoneName, ZoneStats } from "@/types/sensor.types";
 
 // ─── Clinical pressure thresholds (mmHg) ─────────────────────────────────────
 // 🟢 P < 30       → Normal
@@ -9,14 +9,28 @@ export const P_NORMAL    = 30;
 export const P_CAUTION   = 32;
 export const P_EMERGENCY = 40;
 
-// Zone → matrix index ranges
-export const ZONE_INDICES: Record<ZoneName, number[]> = {
-  shoulders: [0, 1, 2, 3, 4, 5, 6, 7],
-  thorax:    [7, 8, 9, 10, 11, 12, 13, 14],
-  sacrum:    [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
-  legs:      [23, 24, 25, 26, 27, 28, 29, 30, 31],
-  heels:     [32, 33, 34, 35, 36, 37, 38, 39],
+// Zone → FSR sensor indices (10-sensor layout: 2 sensors per zone)
+export const ZONE_INDICES: Record<ZoneName, [number, number]> = {
+  shoulders: [0, 1],
+  thorax:    [2, 3],
+  sacrum:    [4, 5],
+  legs:      [6, 7],
+  heels:     [8, 9],
 };
+
+/** Ordered sensor labels matching matrix indices 0–9 */
+const SENSOR_LABELS: SensorLabel[] = [
+  "shoulder_left", "shoulder_right",
+  "thorax_left",   "thorax_right",
+  "sacrum_left",   "sacrum_right",
+  "leg_left",      "leg_right",
+  "heel_left",     "heel_right",
+];
+
+/** Returns the human-readable label for a given FSR sensor index (0–9) */
+export function getSensorLabel(index: number): SensorLabel {
+  return SENSOR_LABELS[index] ?? ("unknown" as SensorLabel);
+}
 
 export function alertLevelToColor(level: AlertLevel): string {
   switch (level) {

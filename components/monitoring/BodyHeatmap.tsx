@@ -1,24 +1,28 @@
 "use client";
 import { mmHgToColor } from "@/lib/utils/pressure";
+import { getSensorLabel } from "@/lib/utils/pressure";
 
-// 40 anatomical node positions in a 300×600 viewBox (supine body silhouette)
-const NODE_POSITIONS: [number, number, string][] = [
-  // shoulders (0-7)
-  [80,95,"Épaules"],[100,90,"Épaules"],[120,86,"Épaules"],[140,84,"Épaules"],
-  [160,84,"Épaules"],[180,86,"Épaules"],[200,90,"Épaules"],[220,95,"Épaules"],
-  // thorax (8-14)
-  [105,145,"Thorax"],[125,140,"Thorax"],[145,136,"Thorax"],[155,136,"Thorax"],
-  [175,140,"Thorax"],[195,145,"Thorax"],[150,160,"Thorax"],
-  // sacrum (15-25)
-  [120,225,"Sacrum"],[135,220,"Sacrum"],[150,216,"Sacrum"],[165,220,"Sacrum"],[180,225,"Sacrum"],
-  [130,240,"Sacrum"],[150,236,"Sacrum"],[170,240,"Sacrum"],
-  [135,255,"Sacrum"],[150,252,"Sacrum"],[165,255,"Sacrum"],
-  // legs (26-34)
-  [120,295,"Jambes"],[150,290,"Jambes"],[180,295,"Jambes"],
-  [115,335,"Jambes"],[145,330,"Jambes"],[175,335,"Jambes"],
-  [110,375,"Jambes"],[150,370,"Jambes"],[190,375,"Jambes"],
-  // heels (35-39)
-  [115,440,"Talons"],[135,445,"Talons"],[150,442,"Talons"],[165,445,"Talons"],[185,440,"Talons"],
+/**
+ * 10 FSR sensor positions in a 300×500 viewBox (supine body silhouette).
+ * Layout: 2 sensors per zone, left/right of body center-line.
+ * [cx, cy, label]
+ */
+const SENSOR_POSITIONS: [number, number, string][] = [
+  // shoulders (0–1)
+  [110, 100, "Épaule gauche"],
+  [190, 100, "Épaule droite"],
+  // thorax (2–3)
+  [120, 160, "Thorax gauche"],
+  [180, 160, "Thorax droit"],
+  // sacrum (4–5)
+  [130, 240, "Sacrum gauche"],
+  [170, 240, "Sacrum droit"],
+  // legs (6–7)
+  [115, 330, "Jambe gauche"],
+  [185, 330, "Jambe droite"],
+  // heels (8–9)
+  [115, 440, "Talon gauche"],
+  [185, 440, "Talon droit"],
 ];
 
 interface BodyHeatmapProps {
@@ -61,24 +65,31 @@ export function BodyHeatmap({ matrix, onNodeClick }: BodyHeatmapProps) {
         {/* Right foot */}
         <ellipse cx="185" cy="455" rx="22" ry="12" fill="#e8edf4" stroke="#c8d0dc" strokeWidth="1" />
 
-        {/* Sensor nodes */}
-        {NODE_POSITIONS.map(([x, y, zone], i) => {
+        {/* Sensor dots — 10 FSR sensors (2 per zone) */}
+        {SENSOR_POSITIONS.map(([x, y, label], i) => {
           const val = matrix[i] ?? 0;
           const color = mmHgToColor(val);
           return (
             <g key={i}>
-              <title>{zone} — {Math.round(val)} mmHg</title>
+              <title>{label} (#{i} · {getSensorLabel(i)}) — {Math.round(val)} mmHg</title>
+              {/* Outer glow ring for critical sensors */}
+              {val >= 32 && (
+                <circle cx={x} cy={y} r="13" fill={color} opacity="0.25" />
+              )}
               <circle
                 cx={x}
                 cy={y}
-                r="7"
+                r="9"
                 fill={color}
-                opacity="0.88"
+                opacity="0.92"
                 stroke="white"
-                strokeWidth="1.5"
+                strokeWidth="2"
                 style={{ transition: "fill 300ms ease", cursor: onNodeClick ? "pointer" : "default" }}
                 onClick={() => onNodeClick?.(i, val)}
               />
+              <text x={x} y={y + 4} textAnchor="middle" fontSize="7" fill="white" fontWeight="700" style={{ pointerEvents: "none" }}>
+                {Math.round(val)}
+              </text>
             </g>
           );
         })}

@@ -57,7 +57,7 @@ export default function RecommendationsPage() {
 
       <div>
         <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Positions Recommandees</p>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {POSITIONS.map(({ label: pos, desc, recommended }) => (
             <div
               key={pos}
@@ -82,7 +82,7 @@ export default function RecommendationsPage() {
 
       <div>
         <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Soins Preventifs</p>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {TIPS.map(({ icon: Icon, text, color }) => (
             <div key={text} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: color + "15" }}>

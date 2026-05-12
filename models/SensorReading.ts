@@ -25,7 +25,7 @@ const ZoneStatsSchema = new Schema({
 const SensorReadingSchema = new Schema<ISensorReading>({
   patient_id: { type: String, required: true, index: true },
   timestamp: { type: Date, required: true, default: Date.now },
-  matrix: { type: [Number], required: true, validate: [(v: number[]) => v.length === 40, "matrix must have 40 values"] },
+  matrix: { type: [Number], required: true, validate: [(v: number[]) => v.length === 10, "matrix must have exactly 10 values"] },
   zones: {
     sacrum: ZoneStatsSchema,
     shoulders: ZoneStatsSchema,

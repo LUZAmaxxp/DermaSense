@@ -36,7 +36,7 @@ export default function PressurePage() {
   const severity = avgPressure === null ? null : alertLevel ? alertLevelToSeverity(alertLevel) : avgPressure >= P_EMERGENCY ? "critical" : avgPressure >= P_CAUTION ? "high" : avgPressure >= P_NORMAL ? "warning" : "safe";
 
   return (
-    <div className="grid gap-5" style={{ gridTemplateColumns: "1fr 340px", alignItems: "start" }}>
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5 items-start">
 
       <div className="space-y-4">
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">

@@ -69,6 +69,12 @@ export function getMqttClient(): MqttClient | null {
         return;
       }
 
+      // Runtime length guard — discard malformed matrices
+      if (parsed.data.matrix.length !== 10) {
+        console.warn(`[MQTT] Invalid matrix length ${parsed.data.matrix.length}, expected 10. Discarding.`);
+        return;
+      }
+
       const data = parsed.data;
       const zones = computeAllZones(data.matrix);
       const safety_score = computeSafetyScore(data.matrix);

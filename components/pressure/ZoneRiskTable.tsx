@@ -47,6 +47,7 @@ export function ZoneRiskTable({ zones }: ZoneRiskTableProps) {
             <TableHead className="text-[10px] text-gray-400 font-semibold">Zone</TableHead>
             <TableHead className="text-[10px] text-gray-400 font-semibold text-right">Moy.</TableHead>
             <TableHead className="text-[10px] text-gray-400 font-semibold text-right">Max</TableHead>
+            <TableHead className="text-[10px] text-gray-400 font-semibold text-right">Capteurs&nbsp;&gt;32</TableHead>
             <TableHead className="text-[10px] text-gray-400 font-semibold text-right">Statut</TableHead>
           </TableRow>
         </TableHeader>
@@ -56,6 +57,11 @@ export function ZoneRiskTable({ zones }: ZoneRiskTableProps) {
               <TableCell className="text-sm font-medium text-gray-800">{ZONE_LABELS[z.name]}</TableCell>
               <TableCell className="text-sm text-right text-gray-700">{z.avg} mmHg</TableCell>
               <TableCell className="text-sm text-right text-gray-700">{z.max} mmHg</TableCell>
+              <TableCell className="text-sm text-right">
+                <span className={z.count_over_32 > 0 ? "font-bold text-[#ba1a1a]" : "text-gray-400"}>
+                  {z.count_over_32}/2
+                </span>
+              </TableCell>
               <TableCell className="text-right">{statusBadge(z.avg)}</TableCell>
             </TableRow>
           ))}

@@ -32,10 +32,8 @@ export default function HomePage() {
   const now = Date.now();
 
   return (
-    <div
-      className="grid gap-4"
-      style={{ gridTemplateColumns: "280px 1fr 300px", alignItems: "start" }}
-    >
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[280px_1fr_300px] gap-4 items-start">
+
       {/* Col 1 — left */}
       <div className="space-y-4">
         <GlobalSafetyScore score={score} />
@@ -60,7 +58,7 @@ export default function HomePage() {
       </div>
 
       {/* Col 3 — right */}
-      <div className="space-y-4">
+      <div className="space-y-4 md:col-span-2 xl:col-span-1">
         <ZoneStatsRail />
         <ActiveAlertsList />
         <ModeVigilance />
