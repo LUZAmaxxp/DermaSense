@@ -47,8 +47,9 @@ export async function GET(req: NextRequest) {
                 req.signal.addEventListener("abort", () => { clearTimeout(t); resolve(); });
               });
             }
-          } catch {
+          } catch (err) {
             // Redis error — brief backoff then retry
+            console.error("[SSE] Redis xread error:", err);
             await new Promise<void>((r) => setTimeout(r, 2000));
           }
         }
