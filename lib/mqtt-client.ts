@@ -24,7 +24,10 @@ declare global {
 const BROKER_URL   = process.env.MQTT_BROKER_URL   ?? "";
 const USERNAME     = process.env.MQTT_USERNAME      ?? "";
 const PASSWORD     = process.env.MQTT_PASSWORD      ?? "";
-const CLIENT_ID    = process.env.MQTT_CLIENT_ID     ?? "dermasense-server";
+// Append a random suffix so each Vercel/worker instance gets a unique client ID.
+// Sharing the same ID causes HiveMQ to kick the previous connection out on every
+// reconnect, creating an infinite disconnect loop when multiple instances run.
+const CLIENT_ID    = `${process.env.MQTT_CLIENT_ID ?? "dermasense-server"}-${Math.random().toString(36).slice(2, 8)}`;
 const TOPIC_PREFIX = process.env.MQTT_TOPIC_PREFIX  ?? "dermasense";
 
 export function getMqttClient(): MqttClient | null {

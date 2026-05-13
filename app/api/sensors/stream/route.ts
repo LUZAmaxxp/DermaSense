@@ -11,6 +11,10 @@ export async function GET(req: NextRequest) {
   const encoder = new TextEncoder();
   const encode = (s: string) => encoder.encode(s);
 
+  // Ensure MQTT is running regardless of path — on Vercel this is the only
+  // place the MQTT client gets initialised (no persistent worker process).
+  getMqttClient();
+
   // ── Redis path — Vercel production (UPSTASH_REDIS_REST_URL is set) ──────────
   if (redis) {
     const stream = new ReadableStream({
