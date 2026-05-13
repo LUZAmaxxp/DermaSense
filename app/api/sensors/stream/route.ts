@@ -17,25 +17,34 @@ export async function GET(req: NextRequest) {
       async start(controller) {
         controller.enqueue(encode(`data: ${JSON.stringify({ type: "connected" })}\n\n`));
 
-        // "$" means "only messages added after this connection"
-        let lastId = "$";
+        // Use current timestamp as start ID so we only receive entries from now on.
+        // Raw xread response from @upstash/redis (no deserializer):
+        //   [[streamKey, [[entryId, [field, value, ...]], ...]]] | null
+        let lastId = `${Date.now()}-0`;
         // Reconnect before Vercel's 60s function timeout
         const deadline = Date.now() + 55_000;
 
+        // Raw types matching @upstash/redis xread wire format
+        type RawEntry   = [string, string[]];          // [entryId, flatFields]
+        type RawStream  = [string, RawEntry[]];        // [streamKey, entries]
+
         while (!req.signal.aborted && Date.now() < deadline) {
           try {
-            type StreamEntry = { id: string; data: Record<string, unknown> };
             const results = await redis.xread(
               SENSOR_STREAM,
               lastId,
               { count: 10 }
-            ) as [string, StreamEntry[]][] | null;
+            ) as RawStream[] | null;
 
             if (results && results.length > 0) {
               const [, entries] = results[0];
-              for (const entry of entries) {
-                lastId = entry.id;
-                const update = JSON.parse(entry.data.payload as string) as SensorUpdate;
+              for (const [entryId, fields] of entries) {
+                lastId = entryId; // always advance cursor to avoid replaying
+
+                // fields is a flat array: ["payload", "{...json...}"]
+                const payloadIdx = fields.indexOf("payload");
+                if (payloadIdx === -1) continue;
+                const update = JSON.parse(fields[payloadIdx + 1]) as SensorUpdate;
                 controller.enqueue(
                   encode(`data: ${JSON.stringify({ type: "sensor-update", payload: update })}\n\n`)
                 );
