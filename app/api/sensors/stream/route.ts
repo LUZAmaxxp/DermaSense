@@ -28,8 +28,10 @@ export async function GET(req: NextRequest) {
         // Reconnect before Vercel's 60s function timeout
         const deadline = Date.now() + 55_000;
 
-        // Raw types matching @upstash/redis xread wire format
-        type RawEntry   = [string, string[]];          // [entryId, flatFields]
+        // Raw types — @upstash/redis REST client returns flat field arrays but
+        // may auto-deserialize JSON string values into objects.
+        type RawFields  = (string | unknown)[];
+        type RawEntry   = [string, RawFields];         // [entryId, flatFields]
         type RawStream  = [string, RawEntry[]];        // [streamKey, entries]
 
         while (!req.signal.aborted && Date.now() < deadline) {
@@ -45,10 +47,13 @@ export async function GET(req: NextRequest) {
               for (const [entryId, fields] of entries) {
                 lastId = entryId; // always advance cursor to avoid replaying
 
-                // fields is a flat array: ["payload", "{...json...}"]
-                const payloadIdx = fields.indexOf("payload");
+                // fields is a flat array: ["payload", <string | object>]
+                // @upstash/redis REST may return the JSON value already parsed.
+                const payloadIdx = (fields as string[]).indexOf("payload");
                 if (payloadIdx === -1) continue;
-                const update = JSON.parse(fields[payloadIdx + 1]) as SensorUpdate;
+                const raw = fields[payloadIdx + 1];
+                // Handle both: raw string (e.g. local Redis) and pre-parsed object
+                const update = (typeof raw === "string" ? JSON.parse(raw) : raw) as SensorUpdate;
                 controller.enqueue(
                   encode(`data: ${JSON.stringify({ type: "sensor-update", payload: update })}\n\n`)
                 );
