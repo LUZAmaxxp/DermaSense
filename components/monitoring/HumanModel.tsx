@@ -150,7 +150,7 @@ interface HumanModelProps {
   matrix: number[];
 }
 
-type GLTFResult = GLTF & { nodes: Record<string, THREE.Mesh>; materials: Record<string, THREE.Material> };
+type GLTFResult = GLTF & { nodes: Record<string, THREE.Object3D>; materials: Record<string, THREE.Material> };
 
 export function HumanModel({ matrix }: HumanModelProps) {
   const { scene } = useGLTF("/models/human.glb") as GLTFResult;
