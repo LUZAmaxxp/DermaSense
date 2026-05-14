@@ -2,6 +2,7 @@
 import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import * as THREE from "three";
 import { HumanModel } from "./HumanModel";
 
 interface Body3DProps {
@@ -32,8 +33,8 @@ export function Body3D({ matrix }: Body3DProps) {
         camera={{ position: [0, 0.85, 3.2], fov: 42, near: 0.1, far: 100 }}
         gl={{ antialias: true, alpha: false }}
         onCreated={({ gl, scene }) => {
-          gl.setClearColor("#0f172a", 1);
-          scene.background = new (require("three").Color)("#0f172a");
+          gl.setClearColor(0x0f172a, 1);
+          scene.background = new THREE.Color(0x0f172a);
         }}
       >
         {/* Scene background */}
