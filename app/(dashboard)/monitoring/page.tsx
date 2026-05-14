@@ -2,7 +2,11 @@
 import { useSensorStore } from "@/store/useSensorStore";
 import { useSensorStream } from "@/hooks/useSensorStream";
 import { computeSafetyScore, mmHgToColor } from "@/lib/utils/pressure";
-import { BodyHeatmap } from "@/components/monitoring/BodyHeatmap";
+import dynamic from "next/dynamic";
+const Body3D = dynamic(
+  () => import("@/components/monitoring/Body3D").then((m) => m.Body3D),
+  { ssr: false }
+);
 import { ZoneLegend } from "@/components/monitoring/ZoneLegend";
 import { SystemStatus } from "@/components/monitoring/SystemStatus";
 
@@ -20,16 +24,16 @@ export default function MonitoringPage() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] gap-5 items-start">
 
-      <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+      <div className="bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-700 relative">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-base font-bold text-gray-900" style={{ fontFamily: "Manrope, sans-serif" }}>
+            <h2 className="text-base font-bold text-white" style={{ fontFamily: "Manrope, sans-serif" }}>
               Monitoring Temps Reel
             </h2>
           </div>
           <SystemStatus />
         </div>
-        <BodyHeatmap matrix={matrix} />
+        <Body3D matrix={matrix} />
         <div className="mt-4">
           <ZoneLegend />
         </div>
