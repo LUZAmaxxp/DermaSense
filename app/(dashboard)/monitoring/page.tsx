@@ -44,7 +44,7 @@ export default function MonitoringPage() {
           {[
             { label: "Pression Moy.", value: avgPressure !== null ? avgPressure : null, unit: "mmHg", color: avgPressure !== null ? mmHgToColor(avgPressure) : "#d1d5db" },
             { label: "Score Global",   value: score !== null ? score + "%" : null, unit: "",     color: score !== null ? (score >= 80 ? "#006e11" : score >= 60 ? "#f59e0b" : "#ba1a1a") : "#d1d5db" },
-            { label: "Capteurs Actifs",value: latest ? "40" : null, unit: "/40",  color: "#003f7b" },
+            { label: "Capteurs Actifs",value: latest ? "10" : null, unit: "/10",  color: "#003f7b" },
           ].map(({ label, value, unit, color }) => (
             <div key={label} className="bg-white rounded-xl p-3 sm:p-4 border border-gray-100 shadow-sm text-center">
               <p className="text-[9px] sm:text-[10px] text-gray-500 font-medium uppercase tracking-wide leading-tight">{label}</p>
