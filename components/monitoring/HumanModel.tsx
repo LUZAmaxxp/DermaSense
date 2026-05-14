@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { useGLTF, Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -35,31 +35,33 @@ function pressureToScale(mmhg: number): number {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3-D sensor positions (Y-up world, model roughly 1.7 units tall centred at 0)
-// These are tuned for a standing neutral-pose human model.
-// Adjust Y/Z offsets here if your GLB is scaled differently.
+// 3-D sensor positions in NORMALIZED body space:
+//   - feet at y = 0, top of head at y = 1.7  (model auto-scaled to this)
+//   - x = 0 is the body's centre-line
+//   - z > 0 = front surface (blobs sit on the front so they are always visible)
+// Tweak these values here if a blob looks off on your specific GLB.
 // ─────────────────────────────────────────────────────────────────────────────
 const SENSOR_POSITIONS: { label: string; pos: [number, number, number] }[] = [
   // 0 – Épaule gauche
-  { label: "Épaule gauche",  pos: [-0.18, 1.35,  0.05] },
+  { label: "Épaule gauche",  pos: [-0.20, 1.42,  0.14] },
   // 1 – Épaule droite
-  { label: "Épaule droite",  pos: [ 0.18, 1.35,  0.05] },
+  { label: "Épaule droite",  pos: [ 0.20, 1.42,  0.14] },
   // 2 – Thorax gauche
-  { label: "Thorax gauche",  pos: [-0.10, 1.10,  0.08] },
+  { label: "Thorax gauche",  pos: [-0.12, 1.15,  0.16] },
   // 3 – Thorax droit
-  { label: "Thorax droit",   pos: [ 0.10, 1.10,  0.08] },
+  { label: "Thorax droit",   pos: [ 0.12, 1.15,  0.16] },
   // 4 – Sacrum gauche
-  { label: "Sacrum gauche",  pos: [-0.07, 0.75,  0.00] },
+  { label: "Sacrum gauche",  pos: [-0.08, 0.80,  0.14] },
   // 5 – Sacrum droit
-  { label: "Sacrum droit",   pos: [ 0.07, 0.75,  0.00] },
+  { label: "Sacrum droit",   pos: [ 0.08, 0.80,  0.14] },
   // 6 – Jambe gauche
-  { label: "Jambe gauche",   pos: [-0.10, 0.38,  0.03] },
+  { label: "Jambe gauche",   pos: [-0.11, 0.44,  0.12] },
   // 7 – Jambe droite
-  { label: "Jambe droite",   pos: [ 0.10, 0.38,  0.03] },
+  { label: "Jambe droite",   pos: [ 0.11, 0.44,  0.12] },
   // 8 – Talon gauche
-  { label: "Talon gauche",   pos: [-0.09, 0.04, -0.05] },
+  { label: "Talon gauche",   pos: [-0.10, 0.06,  0.08] },
   // 9 – Talon droit
-  { label: "Talon droit",    pos: [ 0.09, 0.04, -0.05] },
+  { label: "Talon droit",    pos: [ 0.10, 0.06,  0.08] },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -153,24 +155,60 @@ type GLTFResult = GLTF & { nodes: Record<string, THREE.Mesh>; materials: Record<
 export function HumanModel({ matrix }: HumanModelProps) {
   const { scene } = useGLTF("/models/human.glb") as GLTFResult;
 
-  // Apply neutral skin material to all meshes in the model
-  scene.traverse((obj) => {
-    if ((obj as THREE.Mesh).isMesh) {
+  // ── Normalise the model regardless of original scale/offset ──────────────
+  // Computes: scale so height = 1.7 units, position so feet land at y=0 and
+  // the body is centred on x/z.  Runs once per loaded scene (cached by useGLTF).
+  const { modelScale, modelPosition } = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+
+    const s = size.y > 0 ? 1.7 / size.y : 1;
+    return {
+      modelScale: s,
+      // group position (world-space), applied AFTER scale:
+      //   a child point at raw [x,y,z] lands at world [x*s + px, y*s + py, z*s + pz]
+      //   → we want feet (y = box.min.y) at world 0: py = -box.min.y * s
+      //   → we want centre x/z at world 0: px = -center.x * s, pz = -center.z * s
+      modelPosition: [
+        -center.x * s,
+        -box.min.y * s,
+        -center.z * s,
+      ] as [number, number, number],
+    };
+  }, [scene]);
+
+  // ── Apply skin material (once per cached scene) ──────────────────────────
+  useMemo(() => {
+    scene.traverse((obj) => {
+      if (!(obj as THREE.Mesh).isMesh) return;
       const mesh = obj as THREE.Mesh;
       mesh.castShadow    = true;
       mesh.receiveShadow = true;
-      if (!Array.isArray(mesh.material)) {
-        const mat = mesh.material as THREE.MeshStandardMaterial;
-        mat.color?.set("#c8a882");
-        mat.roughness  = 0.85;
-        mat.metalness  = 0.0;
-      }
-    }
-  });
+      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      mats.forEach((m) => {
+        const mat = m as THREE.MeshStandardMaterial;
+        if (mat.isMeshStandardMaterial) {
+          mat.color.set("#c8a882");
+          mat.roughness    = 0.85;
+          mat.metalness    = 0.0;
+          mat.needsUpdate  = true;
+        }
+      });
+    });
+  }, [scene]);
 
   return (
-    <group>
-      <primitive object={scene} />
+    <>
+      {/* Normalised body mesh — scale + offset applied at group level */}
+      <group scale={modelScale} position={modelPosition}>
+        <primitive object={scene} />
+      </group>
+
+      {/* Pressure blobs — in WORLD space (same normalised coordinate system)
+          Kept outside the scaled group so their size stays constant in world units */}
       {SENSOR_POSITIONS.map((s, i) => (
         <PressureBlob
           key={i}
@@ -179,7 +217,7 @@ export function HumanModel({ matrix }: HumanModelProps) {
           mmhg={matrix[i] ?? 0}
         />
       ))}
-    </group>
+    </>
   );
 }
 

@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useRef } from "react";
+import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows } from "@react-three/drei";
 import { HumanModel } from "./HumanModel";
@@ -29,10 +29,13 @@ export function Body3D({ matrix }: Body3DProps) {
   return (
     <div className="w-full h-[480px] rounded-xl overflow-hidden bg-gradient-to-b from-slate-900 to-slate-800">
       <Canvas
-        camera={{ position: [0, 0.9, 2.8], fov: 45, near: 0.1, far: 100 }}
+        camera={{ position: [0, 0.85, 3.2], fov: 42, near: 0.1, far: 100 }}
         shadows
         gl={{ antialias: true, alpha: false }}
       >
+        {/* Dark background — prevents white flash */}
+        <color attach="background" args={["#0f172a"]} />
+
         {/* Lighting */}
         <ambientLight intensity={0.5} />
         <directionalLight
@@ -64,7 +67,7 @@ export function Body3D({ matrix }: Body3DProps) {
         {/* Camera controls — drag to rotate, scroll to zoom, right-click to pan */}
         <OrbitControls
           target={[0, 0.85, 0]}
-          minDistance={1.2}
+          minDistance={1.5}
           maxDistance={5}
           minPolarAngle={Math.PI * 0.1}
           maxPolarAngle={Math.PI * 0.9}
