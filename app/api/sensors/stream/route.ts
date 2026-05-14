@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
             } else {
               // No new data — wait 1 second before polling again
               await new Promise<void>((resolve) => {
-                const t = setTimeout(resolve, 1000);
+                const t = setTimeout(resolve, 500);
                 req.signal.addEventListener("abort", () => { clearTimeout(t); resolve(); });
               });
             }
