@@ -1,0 +1,85 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cd-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-build-and-smoke-test:
+    name: Validate, build, and smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AUTH_SECRET: ci-only-auth-secret
+      MONGODB_URI: mongodb://127.0.0.1:27017/dermasense
+      MQTT_BROKER_URL: ""
+      MQTT_USERNAME: ""
+      MQTT_PASSWORD: ""
+      UPSTASH_REDIS_REST_URL: ""
+      UPSTASH_REDIS_REST_TOKEN: ""
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Start production server
+        run: |
+          npm run start > next-server.log 2>&1 &
+          echo $! > next-server.pid
+
+      - name: Wait for production server
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/login > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat next-server.log
+          exit 1
+
+      - name: Run HTTP smoke tests
+        run: npm run test:e2e
+
+      - name: Upload production build
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dermasense-next-build
+          path: |
+            .next
+            public
+            package.json
+            package-lock.json
+            next.config.ts
+          retention-days: 7
+
+      - name: Show server log on failure
+        if: failure()
+        run: cat next-server.log

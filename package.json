@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "typecheck": "tsc --noEmit",
     "build": "next build",
     "start": "next start",
+    "test:e2e": "node scripts/smoke-test.mjs",
     "worker": "tsx worker/mqtt-bridge.ts",
     "seed": "tsx scripts/seed-user.ts",
     "mock": "tsx scripts/mock-sensor.ts",
