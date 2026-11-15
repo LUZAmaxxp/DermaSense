@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DermaSense
 
-## Getting Started
+Plateforme de surveillance des **escarres** : des capteurs de pression (ESP32) transmettent leurs mesures en MQTT, l'application les affiche en temps réel sur un modèle 3D du corps et déclenche des alertes graduées (prévention, vigilance, repositionnement, urgence).
 
-First, run the development server:
+## Fonctionnalités
+
+- Tableau de bord, suivi de monitoring et carte de pression par zone
+- Modèle 3D du corps avec surcouche thermique/pression en temps réel (SSE)
+- Alertes, tendances et recommandations de repositionnement
+- Gestion des patients, authentification (NextAuth)
+- Simulateur de capteurs pour les démonstrations
+
+## Stack technique
+
+Next.js 16 (App Router), React 19, TypeScript, MongoDB (Mongoose), MQTT, Upstash Redis, Three.js, NextAuth v5.
+
+## Démarrage
 
 ```bash
+git clone https://github.com/LUZAmaxxp/DermaSense.git
+cd DermaSense
+npm ci
+cp .env.example .env.local   # puis renseigner les variables
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Application : http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts utiles
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Commande | Rôle |
+|---|---|
+| `npm run dev` | Serveur de développement |
+| `npm run typecheck` | Vérification TypeScript |
+| `npm run build` | Build de production |
+| `npm run test:e2e` | Smoke tests HTTP |
+| `npm run seed` | Créer un utilisateur de test |
+| `npm run mock` | Simuler un capteur (`mock:urgence`, `mock:escalate`) |
+| `npm run worker` | Pont MQTT |
 
-## Learn More
+## Contribuer
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Voir [CONTRIBUTING.md](CONTRIBUTING.md) : GitHub Flow, branches, Pull Requests et revue de code.
