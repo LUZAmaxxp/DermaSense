@@ -1,5 +1,7 @@
 # DermaSense
 
+![CI/CD](https://github.com/LUZAmaxxp/DermaSense/actions/workflows/ci-cd.yml/badge.svg)
+
 Plateforme de surveillance des **escarres** : des capteurs de pression (ESP32) transmettent leurs mesures en MQTT, l'application les affiche en temps réel sur un modèle 3D du corps et déclenche des alertes graduées (prévention, vigilance, repositionnement, urgence).
 
 ## Fonctionnalités
